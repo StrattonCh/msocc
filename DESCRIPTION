@@ -1,0 +1,21 @@
+Package: msocc
+Version: 0.0.0.9000
+Title: Package for Fitting and Analyzing Computationally Efficient Multi-scale Occupancy Models
+Description: This package allows for the fitting and analyzing of 
+    computationally efficient multi-scale occupancy models using
+    the polya-gamma data augmentation strategy described by 
+    Polson et al. (2012). 
+Authors@R: c(
+    person("Christian", "Stratton", email = "christianstratton@montana.edu", role = c("aut", "cre"))
+    )
+License: None.
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    dplyr,
+    tibble,
+    BayesLogit
+RoxygenNote: 6.1.1
+Type: Package
+Depends: 
+    magrittr

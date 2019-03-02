@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1551473077788.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1813377916",
+    "id" : "A18E2656",
+    "lastKnownWriteTime" : 1551473457,
+    "last_content_update" : 1551473457727,
+    "path" : "C:/Users/3stra/Desktop/msocc/msocc/examples/psi_mcmc_ex.R",
+    "project_path" : "examples/psi_mcmc_ex.R",
+    "properties" : {
+        "cursorPosition" : "17,21",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
