@@ -1,38 +1,30 @@
 data(fung)
 
 # prep data
-fung_detect <- fung %>%
+fung.detect <- fung %>%
   dplyr::select(1:4)
 
-fung_sitecov_tbl <- fung %>%
+site.df <- fung %>%
   dplyr::select(-sample, -pcr1, -pcr2) %>%
-  unique(.)
+  dplyr::distinct(site, .keep_all = TRUE) %>%
+  dplyr::arrange(site)
 
-fung_sampcov_tbl <- fung %>%
-  dplyr::select(-pcr1, -pcr2)
+sample.df <- fung %>%
+  dplyr::select(-pcr1, -pcr2) %>%
+  dplyr::arrange(site, sample)
 
 # fit intercept model at all three levels use beta-binomial sampler
-fung_mod1 <- MSOcc_mod(wide_data = fung_detect, progress = T,
-                       site = list(model = ~ 1, cov_tbl = fung_sitecov_tbl),
-                       sample = list(model = ~ 1, cov_tbl = fung_sampcov_tbl),
-                       num.mcmc = 5000, beta_bin = T)
+fung_mod1 <- msocc_mod(wide_data = fung.detect, progress = T,
+                       site = list(model = ~ 1, cov_tbl = site.df),
+                       sample = list(model = ~ 1, cov_tbl = sample.df),
+                       rep = list(model = ~ 1, cov_tbl = sample.df), # covariates aggregated at sample level
+                       num.mcmc = 1000, beta_bin = T)
 
 # model sample level occurence by frog density
-fung_mod2 <- MSOcc_mod(wide_data = fung_detect, progress = T,
-                       site = list(model = ~ 1, cov_tbl = fung_sitecov_tbl),
-                       sample = list(model = ~ frogs, cov_tbl = fung_sampcov_tbl),
-                       num.mcmc = 5000, beta_bin = T)
+fung_mod2 <- msocc_mod(wide_data = fung.detect, progress = T,
+                       site = list(model = ~ 1, cov_tbl = site.df),
+                       sample = list(model = ~ frogs, cov_tbl = sample.df),
+                       rep = list(model = ~ 1, cov_tbl = sample.df),
+                       num.mcmc = 1000, beta_bin = T)
 
-# intercept model for site level occurence with random effects for site
-fung_mod3 <- MSOcc_mod(wide_data = fung_detect, progress = T,
-                       site = list(model = ~ 1 | site, cov_tbl = fung_sitecov_tbl),
-                       sample = list(model = ~ 1, cov_tbl = fung_sampcov_tbl),
-                       num.mcmc = 5000, beta_bin = T)
-
-# intercept model for site level occurence, model sample level occurence
-# by frogs with with random effects for site
-fung_mod4 <- MSOcc_mod(wide_data = fung_detect, progress = T,
-                       site = list(model = ~ 1 | site, cov_tbl = fung_sitecov_tbl),
-                       sample = list(model = ~ frogs | site, cov_tbl = fung_sampcov_tbl),
-                       num.mcmc = 5000, beta_bin = T)
 

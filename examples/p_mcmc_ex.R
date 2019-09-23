@@ -20,4 +20,4 @@ fung_mod1 <- msocc_mod(wide_data = fung.detect, progress = T,
                        rep = list(model = ~ 1, cov_tbl = sample.df), # covariates aggregated at sample level
                        num.mcmc = 1000, beta_bin = T)
 
-theta_mcmc(fung_mod1)
+p_mcmc(fung_mod1)

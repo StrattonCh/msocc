@@ -6,42 +6,40 @@
 #'  directly using a beta-binomial sampler, if restructures these samples into
 #'  an appropriate format.
 #'
-#'@param MSOcc_mod output from \code{\link{MSOcc_mod}}
+#'@details This function returns one column for each replicate and arranges the
+#'  columns by site, sample, and replicate.
 #'
-#'@return an object of class \code{matrix} of dimension \code{num.mcmc} by \code{sum(J)}
+#'@param msocc_mod output from \code{\link{msocc_mod}}
+#'
+#'@return an object of class \code{matrix} of dimension \code{num.mcmc} by \code{sum(K)}
 #'  of posterior samples of theta
 #'
 #'@example examples/theta_mcmc_ex.R
+#'@export
 
-theta_mcmc <- function(MSOcc_mod){
-  sample_mod_char <- as.character(paste0(MSOcc_mod$model.info$samp_mod, collapse = ""))
-  sample_hier <- grepl("[|]", sample_mod_char)
-  J <- MSOcc_mod$model.info$J
+theta_mcmc <- function(msocc_mod){
+  num_mcmc <- msocc_mod$model.info$num.mcmc
+  J <- msocc_mod$model.info$J
+  K <- msocc_mod$model.info$K
+  alpha <- msocc_mod$alpha
+  W <- msocc_mod$model.info$W
 
-  alpha <- MSOcc_mod$alpha
-  W <- MSOcc_mod$model.info$W
-  num_mcmc <- MSOcc_mod$model.info$num.mcmc
-
-  if(sample_hier){
-    names <- list()
-    theta <- list()
-    for(i in 1:dim(alpha)[3]){
-      theta[[i]] <- exp(alpha[,,i] %*%  t(W[[i]])) / (1 + exp(alpha[,,i] %*% t(W[[i]])))
-      names[[i]] <- paste(names(W)[i], 1:nrow(W[[i]]), sep = "_")
+  if(msocc_mod$model.info$beta_bin & msocc_mod$model.info$samp_mod == as.formula("~1")){
+    out <- matrix(rep(msocc_mod$theta, sum(K)), ncol = sum(K))
+    colnames(out) <- NULL
+  } else if(msocc_mod$model.info$beta_bin & msocc_mod$model.info$samp_mod == as.formula("~site")){
+    rep.theta <- with(msocc_mod$model.info$df, tapply(rep, site, length))
+    out <- msocc_mod$theta[,rep(1:ncol(msocc_mod$theta), rep.theta)]
+    colnames(out) <- NULL
+  } else{
+    W.full <- matrix(0, sum(K), ncol(W))
+    for(j in 1:ncol(W)){
+      W.full[,j] <- rep(W[,j], K)
     }
-    out <- matrix(unlist(theta), nrow = num_mcmc)
-    colnames(out) <- unlist(names)
-  } else if(!sample_hier){
-    if(MSOcc_mod$model.info$beta_bin & MSOcc_mod$model.info$samp_mod == as.formula("~1")){
-      out <- matrix(rep(MSOcc_mod$theta, sum(J)), ncol = sum(J))
-      colnames(out) <- rownames(MSOcc_mod$model.info$W)
-    } else if(MSOcc_mod$model.info$beta_bin & MSOcc_mod$model.info$samp_mod == as.formula("~site")){
-      out <- t(apply(MSOcc_mod$theta, 1, FUN = function(x) rep(x, J)))
-      colnames(out) <- rownames(MSOcc_mod$model.info$W)
-    } else{
-      nu <- alpha %*% t(W)
-      out <- exp(nu) / (1 + exp(nu))
-    }
+
+    nu <- alpha %*% t(W.full)
+    out <- exp(nu) / (1 + exp(nu))
   }
   return(out)
 }
+

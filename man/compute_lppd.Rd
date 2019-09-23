@@ -4,10 +4,10 @@
 \alias{compute_lppd}
 \title{Compute log pointwise predictive density}
 \usage{
-compute_lppd(MSOcc_mod)
+compute_lppd(msocc_mod)
 }
 \arguments{
-\item{MSOcc_mod}{output from \code{\link{MSOcc_mod}}}
+\item{msocc_mod}{output from \code{\link{msocc_mod}}}
 }
 \value{
 numeric value that is the lppd

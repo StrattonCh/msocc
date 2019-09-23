@@ -4,13 +4,13 @@
 \alias{theta_mcmc}
 \title{Posterior samples of derived sample-level occurence probability}
 \usage{
-theta_mcmc(MSOcc_mod)
+theta_mcmc(msocc_mod)
 }
 \arguments{
-\item{MSOcc_mod}{output from \code{\link{MSOcc_mod}}}
+\item{msocc_mod}{output from \code{\link{msocc_mod}}}
 }
 \value{
-an object of class \code{matrix} of dimension \code{num.mcmc} by \code{sum(J)}
+an object of class \code{matrix} of dimension \code{num.mcmc} by \code{sum(K)}
  of posterior samples of theta
 }
 \description{
@@ -20,25 +20,32 @@ This function converts posterior samples from sample-level
  directly using a beta-binomial sampler, if restructures these samples into
  an appropriate format.
 }
+\details{
+This function returns one column for each replicate and arranges the
+ columns by site, sample, and replicate.
+}
 \examples{
 data(fung)
 
 # prep data
-fung_detect <- fung \%>\%
+fung.detect <- fung \%>\%
   dplyr::select(1:4)
 
-fung_sitecov_tbl <- fung \%>\%
+site.df <- fung \%>\%
   dplyr::select(-sample, -pcr1, -pcr2) \%>\%
-  unique(.)
+  dplyr::distinct(site, .keep_all = TRUE) \%>\%
+  dplyr::arrange(site)
 
-fung_sampcov_tbl <- fung \%>\%
-  dplyr::select(-pcr1, -pcr2)
+sample.df <- fung \%>\%
+  dplyr::select(-pcr1, -pcr2) \%>\%
+  dplyr::arrange(site, sample)
 
 # fit intercept model at all three levels use beta-binomial sampler
-fung_mod1 <- MSOcc_mod(wide_data = fung_detect, progress = T,
-                       site = list(model = ~ 1, cov_tbl = fung_sitecov_tbl),
-                       sample = list(model = ~ 1, cov_tbl = fung_sampcov_tbl),
-                       num.mcmc = 5000, beta_bin = T)
+fung_mod1 <- msocc_mod(wide_data = fung.detect, progress = T,
+                       site = list(model = ~ 1, cov_tbl = site.df),
+                       sample = list(model = ~ 1, cov_tbl = sample.df),
+                       rep = list(model = ~ 1, cov_tbl = sample.df), # covariates aggregated at sample level
+                       num.mcmc = 1000, beta_bin = T)
 
 theta_mcmc(fung_mod1)
 }

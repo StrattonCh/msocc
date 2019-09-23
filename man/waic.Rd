@@ -4,10 +4,10 @@
 \alias{waic}
 \title{Compute waic}
 \usage{
-waic(MSOcc_mod, type = 2)
+waic(msocc_mod, type = 2)
 }
 \arguments{
-\item{MSOcc_mod}{output from \code{\link{MSOcc_mod}}}
+\item{msocc_mod}{output from \code{\link{msocc_mod}}}
 
 \item{type}{one of \code{c(1, 2)} denoting the type of penalty to use when
 calculating the waic}
@@ -27,4 +27,38 @@ The authors of Gelman et al. (2013) note that the type 2 penalty is a
  hyper-parameters and one that does not. Both are arguably justifiable
  depending upon the situation. We do not incorporate the hyper-parameters in
  our calculations here.
+}
+\examples{
+data(fung)
+
+# prep data
+fung.detect <- fung \%>\%
+  dplyr::select(1:4)
+
+site.df <- fung \%>\%
+  dplyr::select(-sample, -pcr1, -pcr2) \%>\%
+  dplyr::distinct(site, .keep_all = TRUE) \%>\%
+  dplyr::arrange(site)
+
+sample.df <- fung \%>\%
+  dplyr::select(-pcr1, -pcr2) \%>\%
+  dplyr::arrange(site, sample)
+
+# fit intercept model at all three levels use beta-binomial sampler
+fung_mod1 <- msocc_mod(wide_data = fung.detect, progress = T,
+                       site = list(model = ~ 1, cov_tbl = site.df),
+                       sample = list(model = ~ 1, cov_tbl = sample.df),
+                       rep = list(model = ~ 1, cov_tbl = sample.df), # covariates aggregated at sample level
+                       num.mcmc = 1000, beta_bin = T)
+
+# model sample level occurence by frog density
+fung_mod2 <- msocc_mod(wide_data = fung.detect, progress = T,
+                       site = list(model = ~ 1, cov_tbl = site.df),
+                       sample = list(model = ~ frogs, cov_tbl = sample.df),
+                       rep = list(model = ~ 1, cov_tbl = sample.df),
+                       num.mcmc = 1000, beta_bin = T)
+
+# compare
+waic(fung_mod1)
+waic(fung_mod2)
 }

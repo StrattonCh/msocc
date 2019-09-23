@@ -4,11 +4,11 @@
 \alias{posterior_summary}
 \title{Summarize posterior samples}
 \usage{
-posterior_summary(MSOcc_mod, burnin = 0, print = T,
-  level = "overall", quantiles = c(0.025, 0.975), n = "all")
+posterior_summary(msocc_mod, burnin = 0, print = F,
+  level = "overall", quantiles = c(0.025, 0.975), unique = T)
 }
 \arguments{
-\item{MSOcc_mod}{output from \code{\link{MSOcc_mod}}}
+\item{msocc_mod}{output from \code{\link{msocc_mod}} (object of class \code{msocc})}
 
 \item{burnin}{number of samples to discard as burnin when summarizing the
 posterior}
@@ -20,44 +20,43 @@ design should be summarized?}
 
 \item{quantiles}{vector of quantiles for credibility intervals}
 
+\item{unique}{should only unique rows be printed?}
+
 \item{n}{number of rows to print in the console for the posterior summary}
 }
 \value{
-object of class \code{tbl} providing summaries of the posterior
+object of class \code{data.frame} providing summaries of the posterior
+ organized by site, sample, and replicate.
 }
 \description{
 This function allows for easy summaries of the posterior samples
- drawn by \code{\link{MSOcc_mod}}.
+ drawn by \code{\link{msocc_mod}}.
 }
 \examples{
 data(fung)
 
 # prep data
-fung_detect <- fung \%>\%
+fung.detect <- fung \%>\%
   dplyr::select(1:4)
 
-fung_sitecov_tbl <- fung \%>\%
+site.df <- fung \%>\%
   dplyr::select(-sample, -pcr1, -pcr2) \%>\%
-  unique(.)
+  dplyr::distinct(site, .keep_all = TRUE) \%>\%
+  dplyr::arrange(site)
 
-fung_sampcov_tbl <- fung \%>\%
-  dplyr::select(-pcr1, -pcr2)
+sample.df <- fung \%>\%
+  dplyr::select(-pcr1, -pcr2) \%>\%
+  dplyr::arrange(site, sample)
 
 # model sample level occurence by frog density
-fung_mod2 <- MSOcc_mod(wide_data = fung_detect, progress = T,
-                       site = list(model = ~ 1, cov_tbl = fung_sitecov_tbl),
-                       sample = list(model = ~ frogs, cov_tbl = fung_sampcov_tbl),
-                       num.mcmc = 5000, beta_bin = T)
+fung_mod2 <- msocc_mod(wide_data = fung.detect, progress = T,
+                       site = list(model = ~ 1, cov_tbl = site.df),
+                       sample = list(model = ~ frogs, cov_tbl = sample.df),
+                       rep = list(model = ~ 1, cov_tbl = sample.df),
+                       num.mcmc = 1000, beta_bin = T)
 
 # overall summary
 posterior_summary(fung_mod2)
-
-# print unique rows
-posterior_summary(fung_mod2) \%>\%
-  dplyr::mutate(site = unlist(lapply(strsplit(site_sample, '_'), function(x) x[1]))) \%>\%
-  dplyr::select(-site_sample) \%>\%
-  dplyr::select(site, dplyr::everything()) \%>\%
-  dplyr::distinct()
 
 # site level
 posterior_summary(fung_mod2, level = 'site')
@@ -67,5 +66,4 @@ posterior_summary(fung_mod2, level = 'sample')
 
 # rep level
 posterior_summary(fung_mod2, level = 'rep')
-
 }

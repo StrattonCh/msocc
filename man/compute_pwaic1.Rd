@@ -4,10 +4,10 @@
 \alias{compute_pwaic1}
 \title{Compute type 1 waic penalty}
 \usage{
-compute_pwaic1(MSOcc_mod)
+compute_pwaic1(msocc_mod)
 }
 \arguments{
-\item{MSOcc_mod}{output from \code{\link{MSOcc_mod}}}
+\item{msocc_mod}{output from \code{\link{msocc_mod}}}
 }
 \value{
 numeric value that is the pwaic1

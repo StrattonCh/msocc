@@ -3,45 +3,38 @@
 #'@description This function computes the type 1 penalty for waic (pwaic1)
 #'  described in Gelman et al. (2013) for multi-scale occupancy models.
 #'
-#'@param MSOcc_mod output from \code{\link{MSOcc_mod}}
+#'@param msocc_mod output from \code{\link{msocc_mod}}
 #'
 #'@return numeric value that is the pwaic1
+#'@export
 
-compute_pwaic1 <- function(MSOcc_mod){
+compute_pwaic1 <- function(msocc_mod){
   #first piece of the difference
   #convert MCMC samples to probability
-  psi.mcmc <- as.matrix(psi_mcmc(MSOcc_mod), ncol = M)
-  theta.mcmc <- theta_mcmc(MSOcc_mod)
-  p.mcmc <- MSOcc_mod$p
+  psi <- psi_mcmc(msocc_mod)
+  theta <- theta_mcmc(msocc_mod)
+  p <- p_mcmc(msocc_mod)
 
   #pull model info
-  num.mcmc <- dim(psi.mcmc)[1]
-  J <- MSOcc_mod$model.info$J
-  K <- MSOcc_mod$model.info$K
-  z.mcmc <- MSOcc_mod$model.info$z
-  A.mcmc <- MSOcc_mod$model.info$A
-  Y <- MSOcc_mod$model.info$Y
+  num.mcmc <- msocc_mod$model.info$num.mcmc
+  J <- msocc_mod$model.info$J
+  K <- msocc_mod$model.info$K
+  z <- msocc_mod$model.info$z.vec[, rep(1:ncol(msocc_mod$model.info$z.vec), K)]
+  A <- msocc_mod$model.info$A[, rep(1:ncol(msocc_mod$model.info$A), K)]
+  y <- matrix(rep(msocc_mod$model.info$y, num.mcmc), nrow = num.mcmc, byrow = T)
 
-  p.mat <- matrix(rep(p.mcmc, sum(J)), nrow = num.mcmc, byrow = F)
-  y.mat <- matrix(rep(Y, num.mcmc), nrow = num.mcmc, byrow = T)
-  y.choose.mat <- matrix(rep(choose(K, Y), num.mcmc), nrow = num.mcmc, byrow = T)
-  z.vec.mcmc <- matrix(0, num.mcmc, sum(J))
-  psi.vec.mcmc <- matrix(0, num.mcmc, sum(J))
-  for(i in 1:num.mcmc){
-    z.vec.mcmc[i,] <- rep(z.mcmc[i,], J)
-    psi.vec.mcmc[i,] <- rep(psi.mcmc[i,], J)
-  }
 
-  site <- psi.vec.mcmc ^ z.vec.mcmc * (1 - psi.vec.mcmc)^(1 - z.vec.mcmc)
-  sample <- (z.vec.mcmc*theta.mcmc)^A.mcmc * (1 - z.vec.mcmc*theta.mcmc)^(1 - A.mcmc)
-  rep <- y.choose.mat * (A.mcmc*p.mat)^y.mat * (1 - A.mcmc*p.mat)^(K - y.mat)
-  tmp1 <- log(colMeans((site * sample * rep)[2:num.mcmc,]))
+  site <- psi^z * (1 - psi)^(1 - z)
+  sample <- (z*theta)^A * (1 - z*theta)^(1 - A)
+  rep <- (A*p)^y * (1 - A*p)^(1 - y)
+
+  tmp <- (site * sample * rep)[2:num.mcmc,]
+  tmp1 <- log(colMeans(tmp))
 
   #second piece of the difference
-  tmp2 <- colMeans(log((site * sample * rep)[2:num.mcmc,]))
+  tmp2 <- colMeans(log(tmp))
 
   #calculate measure
   pwaic1 <- 2 * sum(tmp1 - tmp2)
   return(pwaic1)
-
 }

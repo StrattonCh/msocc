@@ -6,34 +6,36 @@
 #'  directly using a beta-binomial sampler, if restructures these samples into
 #'  an appropriate format.
 #'
-#'@param MSOcc_mod output from \code{\link{MSOcc_mod}}
+#'@details This function returns one column for each replicate and arranges the
+#'  columns by site, sample, and replicate.
 #'
-#'@return an object of class \code{matrix} of dimension \code{num.mcmc} by \code{M} of
-#'  posterior samples of psi
+#'@param msocc_mod output from \code{\link{msocc_mod}}
+#'
+#'@return an object of class \code{matrix} of dimension \code{num.mcmc} by
+#'  \code{sum(K)} of posterior samples of psi.
 #'
 #'@example examples/psi_mcmc_ex.R
+#'@export
 
-psi_mcmc <- function(MSOcc_mod){
-  site_mod_char <- as.character(paste0(MSOcc_mod$model.info$site_mod, collapse = ""))
-  site_hier <- grepl("[|]", site_mod_char)
-  beta <- MSOcc_mod$beta
-  X <- MSOcc_mod$model.info$X
+psi_mcmc <- function(msocc_mod){
+  num.mcmc <- msocc_mod$model.info$num.mcmc
+  beta <- msocc_mod$beta
+  X <- msocc_mod$model.info$X
+  M <- msocc_mod$model.info$M
+  K <- msocc_mod$model.info$K
 
-  if(site_hier){
-    psi <- matrix(0, dim(beta)[1], dim(beta)[3])
-    for(i in 1:dim(beta)[3]){
-      psi[,i] <- exp(beta[,,i] %*%  matrix(X[,,1], ncol = 1)) / (1 + exp(beta[,,i] %*%  matrix(X[,,1], ncol = 1)))
+  if(msocc_mod$model.info$site_mod == as.formula("~1") & msocc_mod$model.info$beta_bin){
+    psi <- matrix(rep(msocc_mod$psi, sum(K)), ncol = sum(K))
+    colnames(psi) <- NULL
+  } else {
+    rep.X <- with(msocc_mod$model.info$df, tapply(rep, site, length))
+    X.full <- matrix(0, sum(K), ncol(X))
+    for(j in 1:ncol(X)){
+      X.full[,j] <- rep(X[,j], rep.X)
     }
-    colnames(psi) <- dimnames(X)[[3]]
-  } else if(!site_hier) {
-    if(MSOcc_mod$model.info$site_mod == as.formula("~1") & MSOcc_mod$model.info$beta_bin){
-      M <- MSOcc_mod$model.info$M
-      psi <- matrix(rep(MSOcc_mod$psi, M), ncol = M)
-      colnames(psi) <- rownames(X)
-    } else {
-      eta <- beta %*% t(X)
-      psi <- as.matrix(exp(eta) / (1 + exp(eta)), ncol = M)
-    }
+
+    eta <- beta %*% t(X.full)
+    psi <- exp(eta) / (1 + exp(eta))
   }
 
   return(psi)

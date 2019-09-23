@@ -2,78 +2,71 @@
 #'
 #'@description This function fits the Bayesian multi-scale occupancy model
 #'  described by Dorazio and Erickson (2017) using the polya-gamma data
-#'  augmentation strategy described by Polson et al. (2012). A hierarchical
-#'  implementation is also available. Note that this documentation assumes there
-#'  are \code{M} sites, \code{J} samples within each site, and \code{K}
-#'  replicates from each sample.
+#'  augmentation strategy described by Polson et al. (2012). Note that this
+#'  documentation assumes there are \eqn{M} sites, \eqn{J_i} samples within each
+#'  site, and \eqn{K_{ij}} replicates from each sample.
 #'
-#'@details This function fits variations of the multi-scale occupancy model
-#'  described by Dorazio and Erickson (2017). However, this function implements
-#'  a fully Bayesian sampler based on the data augmentation strategy described
-#'  by Polson et al. (2012). \cr \cr It also supports hierarchical regression at
-#'  the site and sample levels. Currently, only hierarchies defined by
-#'  \code{site} are supported. To implement a hierarchical regression model,
-#'  define the model using the typical conditional syntax. For example, to fit
-#'  an intercept only regression model at the site level with random effects for
-#'  each site, define \code{site$model = ~ 1 | site}. Think carefully about your
-#'  prior specification, as the regression coefficients are related to
-#'  probabilities through the logit link function; small changes in the
-#'  magnitude of these coefficients can result in large changes in estimated
-#'  probability. \cr \cr Currently, only the site and sample level occurence
-#'  probabilities can be modelled by covariates. The replicate level detection
-#'  probability is assumed constant.
+#'@details This function fits the multi-scale occupancy model described by
+#'  Dorazio and Erickson (2017). However, this function implements a fully
+#'  Bayesian sampler based on the data augmentation strategy described by Polson
+#'  et al. (2012).
 #'
 #'@param wide_data object of class \code{data.frame} containing site, sample,
 #'  and PCR replicates in wide format. Column names should be \code{site},
-#'  \code{sample}, \code{PCR1}, \code{PCR2}, ...
+#'  \code{sample}, \code{PCR1}, \code{PCR2}, ... and contain no other columns.
 #'
 #'@param site object of class \code{list} containing the following elements: \cr
-#'  * \code{model} object of class formula describing the within site
-#'  model. A hierarchical regression model is also available using \code{lmer}
-#'  syntax; currently, only a hierarchy by site is implemented. See details. \cr
-#'  * \code{cov_tbl} object of class \code{data.frame}
-#'  containing site specific covariates; \code{cov_tbl} should have \code{M}
-#'  rows.
+#'  * \code{model} formula describing the within site model. \cr
+#'  * \code{cov_tbl} object of class \code{data.frame} containing site specific
+#'  covariates; \code{cov_tbl} should have exactly one row for each site and have a column named 'site'.
 #'
 #'@param sample object of class \code{list} containing the following elements: \cr
-#'  * \code{model} object of class formula describing the within
-#'  sample model. A hierarchical regression model is also available using
-#'  \code{lmer} syntax; currently, only a hierarchy by site is implemented. See details. \cr
-#'  * \code{cov_tbl} object of class \code{data.frame} containing sample
-#'  specific covariates; \code{cov_tbl} should have \code{sum(J)} rows.
+#'  * \code{model} formula describing the within sample model. \cr
+#'  * \code{cov_tbl} object of class \code{data.frame} containing sample specific
+#'  covariates; \code{cov_tbl} should have exactly one row for each sample and
+#'  have columns named 'site' and 'sample'.
+#'
+#'@param rep object of class \code{list} containing the following elements: \cr
+#'  * \code{model} formula describing the within replicate model. \cr
+#'  * \code{cov_tbl} object of class \code{data.frame} containing replicate specific
+#'  covariates; \code{cov_tbl} should have exactly one row for each sample if
+#'  replicate specific covariates are aggregated at the sample level and contain
+#'  columns named 'site' and 'sample'. Otherwise, \code{cov_tbl} should have
+#'  exactly one row for each replicate and contain columns name 'site',
+#'  'sample', and 'rep'.
 #'
 #'@param priors object of class \code{list} containing the following elements: \cr
 #'  * \code{site} \verb{ } object of class \code{list} containing the
 #'  following elements: \cr
-#'    * \code{mu0} prior mean for site-level regression coefficients
-#'  (if non-hierarchical) or site-level mu (if hierarchical) \cr
-#'    * \code{Lambda0} prior covariance matrix for site-level mu \cr
-#'    * \code{eta0} degrees of freedom for IW prior on Sigma \cr
-#'    * \code{S0} sums of squares for IW prior on Sigma \cr
-#'    * \code{Sigma0} prior covariance matrix for site-level regression coefficients (non-hierarchical)
+#'    * \code{mu0} prior mean for site-level regression coefficients \cr
+#'    * \code{Sigma0} prior covariance matrix for site-level regression
+#'    coefficients
 #'  * \code{sample} \verb{ } object of class \code{list} containing the
 #'  following elements: \cr
-#'    * \code{mu0} prior mean for sample-level regression coefficients
-#'  (if non-hierarchical) or sample-level mu (if hierarchical) \cr
-#'    * \code{Lambda0} prior covariance matrix for sample-level mu \cr
-#'    * \code{eta0} degrees of freedom for IW prior on Sigma \cr
-#'    * \code{S0} sums of squares for IW prior on Sigma \cr
-#'    * \code{Sigma0} prior covariance matrix for sample-level regression coefficients (non-hierarchical)
+#'    * \code{mu0} prior mean for sample-level regression coefficients \cr
+#'    * \code{Sigma0} prior covariance matrix for sample-level regression
+#'    coefficients
 #'  * \code{rep} \verb{ } object of class \code{list} containing the
 #'  following elements: \cr
-#'    * \code{a0,b0} shape parameters for beta prior on p
+#'    * \code{mu0} prior mean for replicate-level regression coefficients \cr
+#'    * \code{Sigma0} prior covariance matrix for replicate-level regression
+#'    coefficients
+#'  * \code{a0,b0} numeric shape parameters for beta prior on probability
+#'  parameters if sampled directly (see \code{beta_bin} argument)
 #'@param num.mcmc number of MCMC samples
 #'@param progress should sampling progress be printed?
 #'@param print interval for printing; defaults to 5 percent of \code{num.mcmc}
+#'  of left \code{NULL}
 #'@param seed optional seed for reproducible samples
-#'@param beta_bin optional; should a beta-binomial sampler be used when possible? This option is considerably faster.
+#'@param beta_bin optional; should a beta-binomial sampler be used when
+#'  possible? This option is considerably faster.
 #'
-#'@example examples/MSOcc_mod_ex.R
+#'@example examples/msocc_mod_ex.R
 #'
 #'@return object of class \code{list} containing the following elements: \cr
 #'  * \code{beta} an object of class \code{matrix} of samples from the joint
 #'  posterior distribution of the regression coefficients at the site level
-#'  * \code{psi} an object of class \code{matrix} of samples from the joint
+#'  * \code{psi} an object of class \code{numeric} of samples from the joint
 #'  posterior distribution of the site-level presence probability, psi. Note
 #'  that this is only returned if \code{beta_bin} is \code{TRUE} and
 #'  \code{site$model = ~ 1}
@@ -84,47 +77,94 @@
 #'  samples from the joint posterior distribution of the sample-level presence
 #'  probability, theta. Note that this is only returned if \code{beta_bin} is
 #'  \code{TRUE} and \code{sample$model = ~ 1} or \code{sample$model = ~ site}
+#'  * \code{delta} an object of class \code{matrix} of samples from the joint
+#'  posterior distribution of the regression coefficients at the replicate level
 #'  * \code{p} an object of class \code{numeric} of sample from the posterior
-#'  distribution of the replicate level detection probability
-#'  * \code{model.info} an object of class list containing the following elements: \cr
+#'  distribution of the replicate level detection probability. NOte that this is
+#'  only returned if \code{beta_bin} is \code{TRUE} and \code{rep$model = ~ 1}.
+#'  * \code{model.info} an object of class list containing the following
+#'  elements: \cr
 #'    * \code{X} design matrix for site level predictors
 #'    * \code{W} design matrix for sample level predictors
+#'    * \code{V} design matrix for replicate level predictors
 #'    * \code{M} number of sites
 #'    * \code{J} vector of number of samples per site
-#'    * \code{K} vector of number of replicates per site-sample combination, or numeric value if K is constant
+#'    * \code{K} vector of number of replicates per site-sample combination
 #'    * \code{z} matrix of posterior samples of latent site-presence z
-#'    * \code{z.vec} matrix of posterior samples of latent site-presence stretched across samples
+#'    * \code{z.vec} matrix of posterior samples of latent site-presence
+#'    stretched across samples
 #'    * \code{A} matrix of posterior samples of latent sample-presence A
-#'    * \code{Y} observed response matrix
+#'    * \code{Y} vector of binomial responses (aggregated at sample level)
+#'    * \code{y} vector of Bernoulli responses (stretched across site-sample
+#'    combination)
 #'    * \code{site_mod} model statement for site-level predictors
 #'    * \code{samp_mod} model statement for sample-level predictors
+#'    * \code{rep_mod} model statement for replicate-level predictors
 #'    * \code{num.mcmc} number of MCMC samples run
 #'    * \code{beta_bin} was beta-binomial sampler implemented if possible?
+#'    * \code{df} empty \code{data.frame} of design in long format
 #'
+#'@importFrom magrittr %>%
+#'@export
 #'
 #'@md
 
-MSOcc_mod <- function(wide_data,
+msocc_mod <- function(wide_data,
                       site = list(model = ~ 1, cov_tbl),
                       sample = list(model = ~ 1, cov_tbl),
-                      priors = list(site = list(mu0 = 0, Lambda0 = 10, eta0 = .01, S0 = 1,
-                                                Sigma0 = 25),
-                                    sample = list(mu0 = 0, Lambda0 = 10, eta0 = .01, S0 = 1,
-                                                  Sigma0 = 25),
-                                    rep = list(a0 = 1, b0 = 1)),
-                      num.mcmc = 10000, progress = T, print = NULL, seed = NULL, beta_bin = F){
+                      rep = list(model = ~ 1, cov_tbl),
+                      priors = list(site = list(mu0 = 0, Sigma0 = 9),
+                                    sample = list(mu0 = 0, Sigma0 = 9),
+                                    rep = list(mu0 = 0, Sigma0 = 9), a0 = 1, b0 = 1),
+                      num.mcmc = 1000, progress = T, print = NULL, seed = NULL, beta_bin = T){
 
   # set optional seed
   if(!is.null(seed)){
     set.seed(seed)
   }
 
-  # fix column names
-  names(wide_data)[c(1,2)] <- c('site', 'sample')
+  # fix column names and arrange tables
+  if(names(wide_data)[1] != 'site' | names(wide_data)[2] != 'sample') stop("First two columns of wide_data are not 'site' and 'sample' respectively. Please rename columns.")
+  wide_data <- dplyr::arrange(wide_data, site, sample)
+
+  if(!('site' %in% names(site$cov_tbl))) stop("There should be a column named 'site' in site$cov_tbl.")
+  site$cov_tbl <- dplyr::arrange(site$cov_tbl, site)
+
+  if(!('site' %in% names(sample$cov_tbl))) stop("There should be a column named 'site' in sample$cov_tbl.")
+  if(!('sample' %in% names(sample$cov_tbl))) stop("There should be a column named 'sample' in sample$cov_tbl.")
+  sample$cov_tbl <- dplyr::arrange(sample$cov_tbl, site, sample)
+
+  if(nrow(rep$cov_tbl) == nrow(sample$cov_tbl)){
+    if(!('site' %in% names(rep$cov_tbl))) stop("There should be a column named 'site' in rep$cov_tbl.")
+    if(!('sample' %in% names(rep$cov_tbl))) stop("There should be a column named 'sample' in rep$cov_tbl.")
+    rep$cov_tbl <- dplyr::arrange(rep$cov_tbl, site, sample)
+  } else {
+    if(!('site' %in% names(rep$cov_tbl))) stop("There should be a column named 'site' in rep$cov_tbl.")
+    if(!('sample' %in% names(rep$cov_tbl))) stop("There should be a column named 'sample' in rep$cov_tbl.")
+    if(!('rep' %in% names(rep$cov_tbl))) stop("There should be a column named 'rep' in rep$cov_tbl.")
+    rep$cov_tbl <- dplyr::arrange(rep$cov_tbl, site, sample, rep)
+  }
+
+  # remove samples with all NAs
+  Y.mat <- as.matrix(wide_data[,-c(1:2)])
+  if(any(apply(Y.mat, 1, FUN = function(x) all(is.na(x))))){
+    remove.ndx <- which(apply(Y.mat, 1, FUN = function(x) all(is.na(x))))
+    if(nrow(rep$cov_tbl) == nrow(sample$cov_tbl)){
+      rep$cov_tbl <- rep$cov_tbl[-remove.ndx,]
+    } else{
+      remove.df <- wide_data %>% dplyr::select(site, sample)
+      keep.df <- remove.df[-remove.ndx,]
+
+      rep$cov_tbl <- dplyr::left_join(keep.df, rep$cov_tbl, by = c('site', 'sample'))
+    }
+    sample$cov_tbl <- sample$cov_tbl[-remove.ndx,]
+    wide_data <- wide_data[-remove.ndx,]
+  }
 
   # build predictors
   site_mod <- as.formula(site$model)
   sample_mod <- as.formula(sample$model)
+  rep_mod <- as.formula(rep$model)
 
   # define number of sites, samples, reps
   M <- length(unique(wide_data$site))
@@ -140,6 +180,8 @@ MSOcc_mod <- function(wide_data,
   wide_data$sample <- as.factor(wide_data$sample)
 
   # initialize z and A vectors based on data
+  Y.mat <- as.matrix(wide_data[,-c(1:2)])
+  y <- na.omit(c(t(Y.mat)))
   wide_data$pcr.total <- rowSums(wide_data[,3:ncol(wide_data)], na.rm = T)
   z.count <- unname(with(wide_data, tapply(pcr.total, site, sum)))
   z <- ifelse(z.count == 0, 0, 1)
@@ -148,407 +190,294 @@ MSOcc_mod <- function(wide_data,
 
   # define models
   ## site
-  site_mod_char <- as.character(paste0(site$model, collapse = ""))
-  site_hier <- grepl("[|]", site_mod_char)
-  if(site_hier){
-    ### hierarchical model
-    within_model <- strsplit(site_mod_char, '[|]')[[1]][1] %>%
-      stringr::str_trim(.) %>%
-      as.formula(.)
-    X.array <- array(0, dim = c(1, ncol(model.matrix(within_model, data = site$cov_tbl)), M))
-    for(i in 1:nrow(site$cov_tbl)){
-      X.array[,,i] <- model.matrix(within_model, data = site$cov_tbl[i,])
-    }
-    dimnames(X.array)[[3]] <- unique(wide_data$site)
-  } else {
-    ### non-hierarchical model
-    X <- model.matrix(object = site_mod, data = site$cov_tbl)
-    # rownames(X) <- paste('site', 1:M, sep = '')
-    rownames(X) <- unique(wide_data$site)
-  }
+  if(!('site' %in% names(site$cov_tbl))) stop("There should be a column named 'site' in site$cov_tbl.")
+  site$cov_tbl <- dplyr::arrange(site$cov_tbl, site)
+  X <- model.matrix(object = site_mod, data = site$cov_tbl)
 
   ## sample
-  sample_mod_char <- as.character(paste0(sample$model, collapse = ""))
-  sample_hier <- grepl("[|]", sample_mod_char)
-  if(sample_hier){
-    samp_within_model <- strsplit(sample_mod_char, '[|]')[[1]][1] %>%
-      stringr::str_trim(.) %>%
-      as.formula(.)
+  if(!('site' %in% names(sample$cov_tbl))) stop("There should be a column named 'site' in sample$cov_tbl.")
+  if(!('sample' %in% names(sample$cov_tbl))) stop("There should be a column named 'sample' in sample$cov_tbl.")
+  sample$cov_tbl <- dplyr::arrange(sample$cov_tbl, site, sample)
+  W <- model.matrix(object = sample_mod, data = sample$cov_tbl)
 
-    samp_ndx <- unique(sample$cov_tbl$site)
-    W.list <- list()
-    for(samp in 1:length(samp_ndx)){
-      W.list[[samp]] <- model.matrix(samp_within_model, data = filter(sample$cov_tbl, site == samp_ndx[samp]))
-    }
-    names(W.list) <- unique(wide_data$site)
-  } else {
-    ### nonhierarchical model
-    W <- model.matrix(object = sample_mod, data = sample$cov_tbl)
-    Wnames <- paste(sample$cov_tbl$site, sample$cov_tbl$sample, sep = "_")
-    rownames(W) <- Wnames
+  ## rep
+  if(nrow(rep$cov_tbl) == sum(J)){
+    if(!('site' %in% names(rep$cov_tbl))) stop("There should be a column named 'site' in rep$cov_tbl.")
+    if(!('sample' %in% names(rep$cov_tbl))) stop("There should be a column named 'sample' in rep$cov_tbl.")
+    rep$cov_tbl <- dplyr::arrange(rep$cov_tbl, site, sample)
+
+    V <- model.matrix(object = rep_mod, data = rep$cov_tbl)
+  } else if(nrow(rep$cov_tbl == sum(K))){
+    if(!('site' %in% names(rep$cov_tbl))) stop("There should be a column named 'site' in rep$cov_tbl.")
+    if(!('sample' %in% names(rep$cov_tbl))) stop("There should be a column named 'sample' in rep$cov_tbl.")
+    if(!('rep' %in% names(rep$cov_tbl))) stop("There should be a column named 'rep' in rep$cov_tbl.")
+    rep$cov_tbl <- dplyr::arrange(rep$cov_tbl, site, sample, rep)
+
+    V <- model.matrix(object = rep_mod, data = rep$cov_tbl)
+  } else{
+    stop('The number of rows in rep$cov_tbl should be either equal to the number total number of samples or the total number of replicates.')
   }
 
   # setup storage for Gibbs sampler
-  if(site_hier){
-    p.site <- dim(X.array)[2]
-    beta.mcmc <- array(0, dim = c(num.mcmc, p.site, M))
+  ## site
+  ### pg
+  p.site <- dim(X)[2]
+  beta.mcmc <- matrix(0, num.mcmc, p.site);colnames(beta.mcmc) <- colnames(X)
+  z.mcmc <- matrix(0, num.mcmc, M); z.mcmc[1,] <- z
+  z.vec.mcmc <- matrix(0, num.mcmc, sum(J)); z.vec.mcmc[1,] <- rep(z, J)
 
-    z.mcmc <- matrix(0, num.mcmc, M)
-    z.mcmc[1,] <- z
-    z.vec.mcmc <- matrix(0, num.mcmc, sum(J))
-    z.vec.mcmc[1,] <- rep(z, J)
+  ### beta-bin
+  psi.mcmc <- rep(.5, num.mcmc)
 
-    # beta-bin
-    psi.mcmc <- rep(.5, num.mcmc)
+  ## sample
+  ### pg
+  p.samp <- dim(W)[2]
+  alpha.mcmc <- matrix(0, num.mcmc, p.samp);colnames(alpha.mcmc) <- colnames(W)
+  A.mcmc <- matrix(0, num.mcmc, sum(J)); A.mcmc[1,] <- A
+
+  ### beta-bin
+  if(sample$model == as.formula("~1")){
+    theta.mcmc <- rep(.5, num.mcmc)
+  } else if(sample$model == as.formula("~site")){
+    theta.mcmc <- matrix(.5, num.mcmc, length(J))
   } else{
-    # pg
-    p.site <- dim(X)[2]
-    beta.mcmc <- matrix(0, num.mcmc, p.site);colnames(beta.mcmc) <- colnames(X)
-    z.mcmc <- matrix(0, num.mcmc, M); z.mcmc[1,] <- z
-    z.vec.mcmc <- matrix(0, num.mcmc, sum(J)); z.vec.mcmc[1,] <- rep(z, J)
-
-    # beta-bin
-    psi.mcmc <- rep(.5, num.mcmc)
+    theta.mcmc <- NULL
   }
 
-  if(sample_hier){
-    p.samp <- dim(W.list[[1]])[2]
-    alpha.mcmc <- array(0, dim = c(num.mcmc, p.samp, M))
+  ## rep
+  ### pg
+  p.rep <- dim(V)[2]
+  delta.mcmc <- matrix(0, num.mcmc, p.rep);colnames(delta.mcmc) <- colnames(V)
 
-    A.mcmc <- matrix(0, num.mcmc, sum(J))
-    A.mcmc[1,] <- A
-
-    # beta-bin
-    if(sample$model == as.formula("~1")){
-      theta.mcmc <- rep(.5, num.mcmc)
-    } else if(sample$model == as.formula("~site")){
-      theta.mcmc <- matrix(.5, num.mcmc, length(J))
-    } else{
-      theta.mcmc <- NULL
-    }
-  } else {
-    # pg
-    p.samp <- dim(W)[2]
-    alpha.mcmc <- matrix(0, num.mcmc, p.samp);colnames(alpha.mcmc) <- colnames(W)
-    A.mcmc <- matrix(0, num.mcmc, sum(J)); A.mcmc[1,] <- A
-
-    # beta-bin
-    if(sample$model == as.formula("~1")){
-      theta.mcmc <- rep(.5, num.mcmc)
-    } else if(sample$model == as.formula("~site")){
-      theta.mcmc <- matrix(.5, num.mcmc, length(J))
-    } else{
-      theta.mcmc <- NULL
-    }
+  ### beta-bin
+  if(rep$model == as.formula("~1")){
+    p.mcmc <- rep(.5, num.mcmc)
+  } else{
+    p.mcmc <- NULL
   }
-
-  p.mcmc <- rep(.5, num.mcmc)
 
   # define priors
-  if(site_hier){
-    mu0_site <- matrix(priors$site$mu0, ncol = 1, nrow = p.site)
-    Lambda0_site <- priors$site$Lambda0*diag(p.site)
-    Lambda0_site_inv <- solve(Lambda0_site)
-    prior_prod_site <- Lambda0_site_inv %*% mu0_site
+  ## site
+  mu0_site <- matrix(priors$site$mu0, p.site, 1)
+  Sigma0_site <- priors$site$Sigma0* diag(p.site)
+  Sigma0_site_inv <- solve(Sigma0_site)
+  prior_prod_site <- Sigma0_site_inv %*% mu0_site
 
-    eta0_site <- priors$site$eta0
-    S0_site <- priors$site$S0*diag(p.site)
+  ## sample
+  mu0_samp <- matrix(priors$sample$mu0, p.samp, 1)
+  Sigma0_samp <- priors$sample$Sigma0 * diag(p.samp)
+  Sigma0_samp_inv <- solve(Sigma0_samp)
+  prior_prod_samp <- Sigma0_samp_inv %*% mu0_samp
+
+  ## rep
+  mu0_rep <- matrix(priors$rep$mu0, p.rep, 1)
+  Sigma0_rep <- priors$rep$Sigma0 * diag(p.rep)
+  Sigma0_rep_inv <- solve(Sigma0_rep)
+  prior_prod_rep <- Sigma0_rep_inv %*% mu0_rep
+
+  ## for uniform priors
+  a0 <- priors$a0
+  b0 <- priors$b0
+
+  # initialize
+  ## site
+  if(beta_bin & site$model == as.formula('~1')){
+    psi <- rep(psi.mcmc[1], M)
   } else{
-    mu0_site <- matrix(priors$site$mu0, p.site, 1)
-    Sigma0_site <- priors$site$Sigma0* diag(p.site)
-    Sigma0_site_inv <- solve(Sigma0_site)
-    prior_prod_site <- Sigma0_site_inv %*% mu0_site
+    eta <- X %*% beta.mcmc[1,]
+    psi <- exp(eta) / (1 + exp(eta))
   }
 
-  if(sample_hier){
-    mu0_sample <- matrix(priors$sample$mu0, ncol = 1, nrow = p.samp)
-    Lambda0_sample <- priors$sample$Lambda0*diag(p.samp)
-    Lambda0_sample_inv <- solve(Lambda0_sample)
-    prior_prod_sample <- Lambda0_sample_inv %*% mu0_sample
-
-    eta0_sample <- priors$sample$eta0
-    S0_sample <- priors$sample$S0*diag(p.samp)
-  } else {
-    mu0_samp <- matrix(priors$sample$mu0, p.samp, 1)
-    Sigma0_samp <- priors$sample$Sigma0 * diag(p.samp)
-    Sigma0_samp_inv <- solve(Sigma0_samp)
-    prior_prod_samp <- Sigma0_samp_inv %*% mu0_samp
+  ## sample
+  if(beta_bin & sample$model == as.formula("~1")){
+    theta <- rep(theta.mcmc[1], sum(J))
+  } else if(beta_bin & (sample$model == as.formula("~site") | sample$model == as.formula("~Site"))){
+    theta <- rep(theta.mcmc[1,], J)
+  } else{
+    nu <- W %*% alpha.mcmc[1,]
+    theta <- exp(nu) / (1 + exp(nu))
   }
 
-  ### rep
-  a0 <- priors$rep$a0
-  b0 <- priors$rep$b0
-
-  # define cutoffs to handle imbalanced designs
-  samp.cutoffs <- c(0, cumsum(J))
-
-  # initialize sampler
-  theta_site <- matrix(0, ncol = 1, nrow = p.site)
-  Sigma_site <- diag(p.site)
-  Sigma_site_inv <- solve(Sigma_site)
-
-  theta_sample <- matrix(0, ncol = 1, nrow = p.site)
-  Sigma_sample <- diag(p.samp)
-  Sigma_sample_inv <- solve(Sigma_sample)
+  ## rep
+  if(beta_bin & rep$model == as.formula("~1")){
+    p <- rep(p.mcmc[1], length(y))
+  } else if(dim(V)[1] == sum(J)){
+    nu_rep <- V %*% delta.mcmc[1,]
+    p.tmp <- exp(nu_rep) / (1 + exp(nu_rep))
+    p <- rep(p.tmp, K)
+  } else{
+    nu_rep <- V %*% delta.mcmc[1,]
+    p <- exp(nu_rep) / (1 + exp(nu_rep))
+  }
 
   # conduct Gibbs sampler
   for(i in 2:num.mcmc){
     if(i == 2){begin <- proc.time()}
 
-    #######################
-    ### UPDATE LATENT Z ###
-    #######################
-
-    # linear predictor for site
-    if(site_hier){
-      tmp <- X.array %>%
-        c(.) %>%
-        matrix(., ncol = M) * beta.mcmc[i-1,,]
-      eta <- colSums(tmp)
-      psi <- exp(eta) / (1 + exp(eta))
-    } else{
-      if(beta_bin & site$model == as.formula('~1')){
-        psi <- rep(psi.mcmc[i-1], M)
-      } else{
-        eta <- X %*% beta.mcmc[i-1,]
-        psi <- exp(eta) / (1 + exp(eta))
-      }
-    }
-
-    # linear predictor for sample
-    if(sample_hier){
-      theta <- c()
-      nu <- c()
-      for(samp in 1:length(samp_ndx)){
-        lin_pred <- W.list[[samp]] %*% matrix(alpha.mcmc[i-1,,samp], ncol = 1)
-        tmp <- exp(lin_pred) / (1 + exp(lin_pred))
-        theta <- c(theta, tmp)
-        nu <- c(nu, lin_pred)
-      }
-    } else {
-      if(beta_bin & sample$model == as.formula("~1")){
-        theta <- rep(theta.mcmc[i-1], sum(J))
-      } else if(beta_bin & sample$model == as.formula("~site")){
-        theta <- rep(theta.mcmc[i-1,], J)
-      } else{
-        nu <- W %*% alpha.mcmc[i-1,]
-        theta <- exp(nu) / (1 + exp(nu))
-      }
-    }
-
-    # determine z sampling probability
-    num <- NULL;A.sum <- NULL
-    for(q in 2:length(samp.cutoffs)){
-      lwr <- samp.cutoffs[q-1] + 1
-      upr <- samp.cutoffs[q]
-      num[q-1] <- prod((1 - theta)[lwr:upr])
-
-      A.sum[q-1] <- sum(A[lwr:upr])
-    }
-
-    z.prob.num <- psi * num ## numerator of full conditional
-    z.prob.denom <- z.prob.num - psi + 1 ## denominator of full conditional
-    z.prob <- z.prob.num/z.prob.denom ## calculate probability for full conditional bernoulli distr.
-
-    z.tmp <- NULL
-    for(q in 2:length(samp.cutoffs)){
-      lwr <- samp.cutoffs[q-1] + 1
-      upr <- samp.cutoffs[q]
-      z.tmp[q-1] <- as.numeric(all(A[lwr:upr] == 0))
-    }
-    z.sample.prob <- ifelse(z.prob * z.tmp == 0, 1, z.prob * z.tmp) ## calculate sampling probabilities for latent z's
     # sample z
-    z <- rbinom(M, size = 1, prob = z.sample.prob)
-    z.mcmc[i,] <- z
+    A.list <- split(A, rep(1:length(J), J))
+    theta.list <- split(c(theta), rep(1:length(J), J))
+    z.prob <- rep(0, M)
+    for(ndx in 1:M){
+      if(sum(A.list[[ndx]]) > 0) {
+        z.prob[ndx] <- 1
+      } else{
+        num <- c(psi)[ndx] * prod(1 - theta.list[[ndx]])
+        denom <- num + 1 - c(psi)[ndx]
+        z.prob[ndx] <- num / denom
+      }
+    }
+    z <- rbinom(M, 1, z.prob)
+    z.mcmc[i,] <- c(z)
+    z.vec <- rep(z, J)
+    z.vec.mcmc[i,] <- c(z.vec)
 
-    #######################
-    ### UPDATE LATENT A ###
-    #######################
+    # sample A
+    y.list <- split(y, rep(1:length(K), K))
+    p.list <- split(c(p), rep(1:length(K), K))
+    A.prob <- rep(0, length(y.list))
+    for(ndx in 1:length(y.list)){
+      if(sum(y.list[[ndx]]) > 0){
+        A.prob[ndx] <- 1
+      } else{
+        num <- z.vec[ndx] * theta[ndx] * prod(1 - p.list[[ndx]])
+        denom <- num + 1 - z.vec[ndx] * theta[ndx]
+        A.prob[ndx] <- num/denom
+      }
+    }
+    A <- rbinom(sum(J), 1, A.prob)
+    A.mcmc[i, ] <- A
+    A.sum <- unname(sapply(split(A, rep(1:length(J), J)), sum))
 
-    # create vector of presence for each sample
-    z.vec <- rep(z, times = J)
-
-    # create vector of probability of detection for each sample
-    p.vec <- rep(p.mcmc[i-1], sum(J))
-
-    A.prob.num <- z.vec * theta * (1 - p.vec)^K
-    A.prob.denom <- A.prob.num + 1 - z.vec*theta
-    A.prob <- A.prob.num/A.prob.denom
-
-    y.tmp <- ifelse(Y == 0, 0, 1)
-    A.prob[which(y.tmp == 1)] <- 1
-
-    #sample A
-    A <- rbinom(sum(J), size = 1, prob = A.prob)
-    A.mcmc[i,] <- A
-
-    #############################################
-    ### UPDATE REGRESSION COEFFICIENTS - BETA ###
-    #############################################
-
-    if(site_hier){
-      # sample hyper-parameters
-      ## theta
-      ### theta varcov
-      Lambda_site <- Lambda0_site_inv + M*Sigma_site_inv
-      Lambda_site_inv <- solve(Lambda_site)
-
-      ### theta mean
-      beta_bar <- beta.mcmc[i-1,,] %>%
-        matrix(., ncol = M) %>%
-        rowMeans(.) %>%
-        matrix(., ncol = 1)
-      mu_site <- Lambda_site_inv %*% (prior_prod_site + M*Sigma_site_inv %*% beta_bar)
-
-      ### sample theta
-      theta_site <- mvtnorm::rmvnorm(1, mean = mu_site, sigma = Lambda_site_inv)
-
-      ## sigma
-      eta_site <- eta0_site + M
-      tmp <- beta.mcmc[i-1,,] %>%
-        matrix(., ncol = M) %>%
-        apply(., 2, FUN = function(x) x - theta_site) %>%
-        matrix(., ncol = M) %>%
-        rowSums(.) %>%
-        matrix(., ncol = 1)
-      S_theta_site <- tmp %*% t(tmp)
-
-      Sigma_site <- MCMCpack::riwish(v = eta_site, S = solve(S0_site + S_theta_site))
-      Sigma_site_inv <- solve(Sigma_site)
+    # sample beta/psi
+    if(beta_bin & site$model == as.formula("~1")){
+      psi.mcmc[i] <- rbeta(1, a0 + sum(z), b0 + M - sum(z))
+    } else{
+      # sample PG latents variables
+      eta <- X %*% beta.mcmc[i-1, ]
+      omega.site <- pgdraw::pgdraw(1, c(eta))
 
       # sample betas
-      ## sample PG latents variables
-      omega.site <- BayesLogit::rpg(M, rep(1, M), eta)
+      kappa.z <- z - .5
+      Omega.site <- diag(omega.site, nrow = M, ncol = M)
+      V.inv <- solve(t(X) %*% Omega.site %*% X + Sigma0_site_inv)
+      m <- V.inv %*% (t(X) %*% kappa.z + prior_prod_site)
 
-      ## define mean and variance
-      z.star <- (1/omega.site)*(z - .5)
-      z.star.array <- array(z.star, dim = c(1,1,M))
-
-      for(loc in 1:M){
-        X.site <- matrix(X.array[,,loc], 1, p.site)
-        Omega.site <- matrix(omega.site[loc], 1, 1)
-        V.inv <- solve(t(X.site) %*% Omega.site %*% X.site + Sigma_site_inv)
-        m <- V.inv %*% (t(X.site) %*% Omega.site %*% z.star.array[,,loc] + Sigma_site_inv %*% mu_site)
-        beta.mcmc[i,,loc] <- mvtnorm::rmvnorm(1, mean = m, sigma = V.inv)
-      }
-    } else{
-      if(beta_bin & site$model == as.formula("~1")){
-        psi.mcmc[i] <- rbeta(1, a0 + sum(z), b0 + M - sum(z))
-      } else{
-        # sample PG latents variables
-        eta <- X %*% beta.mcmc[i-1, ]
-        omega.site <- BayesLogit::rpg(M, rep(1, M), eta)
-
-        # sample betas
-        z.star <- (1/omega.site)*(z - .5)
-        Omega.site <- diag(omega.site, nrow = M, ncol = M)
-        V.inv <- solve(t(X) %*% Omega.site %*% X + Sigma0_site_inv)
-        m <- V.inv %*% (t(X) %*% Omega.site %*% z.star + prior_prod_site)
-
-        beta.mcmc[i,] <- mvtnorm::rmvnorm(1, mean = m, sigma = V.inv)
-      }
+      beta.mcmc[i,] <- mvtnorm::rmvnorm(1, mean = m, sigma = V.inv)
     }
 
-    ##############################################
-    ### UPDATE REGRESSION COEFFICIENTS - ALPHA ###
-    ##############################################
-
-    if(sample_hier){
-      # sample hyper-parameters
-      ## theta
-      ### theta varcov
-      Lambda_sample <- Lambda0_sample_inv + M*Sigma_sample_inv
-      Lambda_sample_inv <- solve(Lambda_sample)
-
-      ### theta mean
-      alpha_bar <- alpha.mcmc[i-1,,] %>%
-        matrix(., ncol = M) %>%
-        rowMeans(.) %>%
-        matrix(., ncol = 1)
-      mu_sample <- Lambda_sample_inv %*% (prior_prod_sample + M*Sigma_sample_inv %*% alpha_bar)
-
-      ### sample theta
-      theta_sample <- mvtnorm::rmvnorm(1, mean = mu_sample, sigma = Lambda_sample_inv)
-
-      ## sigma
-      eta_sample <- eta0_sample + M
-      tmp <- alpha.mcmc[i-1,,] %>%
-        matrix(., ncol = M) %>%
-        apply(., 2, FUN = function(x) x - theta_sample) %>%
-        matrix(., ncol = M) %>%
-        rowSums(.) %>%
-        matrix(., ncol = 1)
-      S_theta_sample <- tmp %*% t(tmp)
-
-      Sigma_sample <- MCMCpack::riwish(v = eta_sample, S = solve(S0_sample + S_theta_sample))
-      Sigma_sample_inv <- solve(Sigma_sample)
-
-      # sample alphas
-      ## sample PG latents variables
-      omega.samp <- BayesLogit::rpg(sum(J), rep(1, sum(J)), nu)
-      a.star <- (1/omega.samp)*(A - .5)
-
-      ## sample alphas
-      a.star.tbl <- tibble(
-        site = sample$cov_tbl$site,
-        a.star = a.star,
-        omega.samp = omega.samp
-      )
-
-      tmp_prod <- Sigma_sample_inv %*% mu_sample
-      for(loc in 1:length(unique(a.star.tbl$site))){
-        W.samp <- matrix(W.list[[loc]], ncol = p.samp)
-        a.star.site <- filter(a.star.tbl, site == samp_ndx[loc]) %>%
-          dplyr::select(a.star) %>%
-          unlist(.) %>%
-          unname(.) %>%
-          matrix(., ncol = 1)
-        Omega.samp <- filter(a.star.tbl, site == samp_ndx[loc]) %>%
-          dplyr::select(omega.samp) %>%
-          unlist(.) %>%
-          unname(.) %>%
-          diag(.)
-
-        V.inv <- solve(t(W.samp) %*% Omega.samp %*% W.samp + Sigma_sample_inv)
-        m <- V.inv %*% (t(W.samp) %*% Omega.samp %*% a.star.site + tmp_prod)
-
-        alpha.mcmc[i,,loc] <- mvtnorm::rmvnorm(1, mean = m, sigma = V.inv)
+    # sample alpha/theta
+    if(beta_bin & sample$model == as.formula("~1")){
+      theta.mcmc[i] <- rbeta(1, a0 + sum(z*A.sum), b0 + sum(z*(J - A.sum)))
+    } else if(beta_bin & sample$model == as.formula("~site")){
+      theta.mcmc[i,] <- rbeta(M, a0 + z*A.sum, b0 + z*(J - A.sum))
+    } else{
+      # restrict to only where z = 1
+      z.ndx <- which(z.vec == 1)
+      if(dim(W)[2] == 1){
+        W.red <- matrix(W[z.ndx,], ncol = 1)
+        colnames(W.red) <- '(Intercept)'
+      } else{
+        W.red <- W[z.ndx,]
       }
 
-    } else {
-      if(beta_bin & sample$model == as.formula("~1")){
-        theta.mcmc[i] <- rbeta(1, a0 + sum(z.vec*A), b0 + sum(z*(J - A.sum)))
-      } else if(beta_bin & sample$model == as.formula("~site") | sample$model == as.formula("~Site")){
-        # z*A.sum problematic if z = 0???
-        theta.mcmc[i,] <- rbeta(M, a0 + z*A.sum, b0 + z*(J - A.sum))
-      } else{
-        # restrict to only where z = 1
-        z.ndx <- which(z.vec == 1)
-        if(dim(W)[2] == 1){
-          W.red <- matrix(W[z.ndx,], ncol = 1)
+      # sample PG latents variables
+      nu <- W.red %*% alpha.mcmc[i-1, ]
+      omega.samp <- pgdraw::pgdraw(1, c(nu))
+
+      # sample betas
+      a <- A[z.ndx]
+      kappa.a <- a - .5
+      Omega.samp <- diag(omega.samp)
+      V.inv <- solve(t(W.red) %*% Omega.samp %*% W.red + Sigma0_samp_inv)
+      m <- V.inv %*% (t(W.red) %*% kappa.a + prior_prod_samp)
+
+      alpha.mcmc[i,] <- mvtnorm::rmvnorm(1, mean = m, sigma = V.inv)
+    }
+
+    # sample delta/p
+    if(beta_bin & rep$model == as.formula("~1")){
+      p.mcmc[i] <- rbeta(1, a0 + sum(A*Y), b0 + sum(A * (K - Y)))
+    } else{
+
+      # restrict to only where A = 1
+      if(dim(V)[1] == sum(J)){
+        A.ndx <- which(A == 1)
+        if(dim(V)[2] == 1){
+          V.red <- matrix(V[A.ndx,], ncol = 1)
+          colnames(V.red) <- '(Intercept)'
         } else{
-          W.red <- W[z.ndx,]
+          V.red <- V[A.ndx,]
         }
 
         # sample PG latents variables
-        nu <- W.red %*% alpha.mcmc[i-1, ]
-        omega.samp <- BayesLogit::rpg(dim(W.red)[1], rep(1, dim(W.red)[1]), nu)
+        nu_rep <- V.red %*% delta.mcmc[i-1, ]
+        omega.rep <- pgdraw::pgdraw(K[A.ndx], nu_rep)
 
         # sample betas
-        a <- A[z.ndx]
-        a.star <- (1/omega.samp)*(a - .5)
-        Omega.samp <- diag(omega.samp)
-        V.inv <- solve(t(W.red) %*% Omega.samp %*% W.red + Sigma0_samp_inv)
-        m <- V.inv %*% (t(W.red) %*% Omega.samp %*% a.star + prior_prod_samp)
+        Y.vec <- Y[A.ndx]
+        kappa.y <- Y.vec - K[A.ndx] / 2
+        Omega.rep <- diag(omega.rep)
+        V.inv <- solve(t(V.red) %*% Omega.rep %*% V.red + Sigma0_rep_inv)
+        m <- V.inv %*% (t(V.red) %*% kappa.y + prior_prod_rep)
 
-        alpha.mcmc[i,] <- mvtnorm::rmvnorm(1, mean = m, sigma = V.inv)
+        delta.mcmc[i,] <- mvtnorm::rmvnorm(1, mean = m, sigma = V.inv)
+      } else{
+        A.vec <- rep(A, K)
+        A.ndx <- which(A.vec == 1)
+        if(dim(V)[2] == 1){
+          V.red <- matrix(V[A.ndx,], ncol = 1)
+          colnames(V.red) <- '(Intercept)'
+        } else{
+          V.red <- V[A.ndx,]
+        }
+
+        # sample PG latents variables
+        nu_rep <- V.red %*% delta.mcmc[i-1, ]
+        omega.rep <- pgdraw::pgdraw(1, nu_rep)
+
+        # sample betas
+        y.vec <- y[A.ndx]
+        kappa.y <- y.vec - .5
+        Omega.rep <- diag(omega.rep)
+        V.inv <- solve(t(V.red) %*% Omega.rep %*% V.red + Sigma0_rep_inv)
+        m <- V.inv %*% (t(V.red) %*% kappa.y + prior_prod_rep)
+
+        delta.mcmc[i,] <- mvtnorm::rmvnorm(1, mean = m, sigma = V.inv)
       }
+
     }
 
-    ######################################
-    ### UPDATE REGRESSION COEFFICIENTS ### for rep to rep covariates - assumed to be constant
-    ######################################
-    p.mcmc[i] <- rbeta(1, a0 + sum(A*Y), b0 + sum(A * (K - Y)))
+    # calculate linear predictors/probs
+    ## site
+    if(beta_bin & site$model == as.formula('~1')){
+      psi <- rep(psi.mcmc[i], M)
+    } else{
+      eta <- X %*% beta.mcmc[i,]
+      psi <- exp(eta) / (1 + exp(eta))
+    }
+
+    ## sample
+    if(beta_bin & sample$model == as.formula("~1")){
+      theta <- rep(theta.mcmc[i], sum(J))
+    } else if(beta_bin & (sample$model == as.formula("~site") | sample$model == as.formula("~Site"))){
+      theta <- rep(theta.mcmc[i,], J)
+    } else{
+      nu <- W %*% alpha.mcmc[i,]
+      theta <- exp(nu) / (1 + exp(nu))
+    }
+
+    ## rep
+    if(beta_bin & rep$model == as.formula("~1")){
+      p <- rep(p.mcmc[i], length(y))
+    } else if(dim(V)[1] == sum(J)){
+      nu_rep <- V %*% delta.mcmc[i,]
+      p.tmp <- exp(nu_rep) / (1 + exp(nu_rep))
+      p <- rep(p.tmp, K)
+    } else{
+      nu_rep <- V %*% delta.mcmc[i,]
+      p <- exp(nu_rep) / (1 + exp(nu_rep))
+    }
 
     if(is.null(print)){
       print <- round(.05*num.mcmc)
@@ -569,39 +498,25 @@ MSOcc_mod <- function(wide_data,
 
   }
 
-  if(site_hier & sample_hier){
-    out <- list(beta = beta.mcmc, alpha = alpha.mcmc, p = p.mcmc, psi = psi.mcmc, theta = theta.mcmc,
-                model.info = list(X = X.array, W = W.list, M = M, J = J, K = K, z = z.mcmc,
-                                  z.vec = z.vec.mcmc, A = A.mcmc, Y = Y,
-                                  site_mod = site_mod_char, samp_mod = sample_mod_char,
-                                  num.mcmc = num.mcmc, beta_bin = beta_bin))
-  } else if(site_hier & !sample_hier){
-    out <- list(beta = beta.mcmc, alpha = alpha.mcmc, p = p.mcmc, psi = psi.mcmc, theta = theta.mcmc,
-                model.info = list(X = X.array, W = W, M = M, J = J, K = K, z = z.mcmc,
-                                  z.vec = z.vec.mcmc, A = A.mcmc, Y = Y,
-                                  site_mod = site_mod_char, samp_mod = sample$model,
-                                  num.mcmc = num.mcmc, beta_bin = beta_bin))
-
-  } else if(!site_hier & sample_hier){
-    out <- list(beta = beta.mcmc, alpha = alpha.mcmc, p = p.mcmc, psi = psi.mcmc, theta = theta.mcmc,
-                model.info = list(X = X, W = W.list, M = M, J = J, K = K, z = z.mcmc,
-                                  z.vec = z.vec.mcmc, A = A.mcmc, Y = Y,
-                                  site_mod = site$model, samp_mod = sample_mod_char,
-                                  num.mcmc = num.mcmc, beta_bin = beta_bin))
-
-  } else if(!site_hier & !sample_hier){
-    out <- list(beta = beta.mcmc, alpha = alpha.mcmc, p = p.mcmc, psi = psi.mcmc, theta = theta.mcmc,
-                model.info = list(X = X, W = W, M = M, J = J, K = K, z = z.mcmc,
-                                  z.vec = z.vec.mcmc, A = A.mcmc, Y = Y,
-                                  site_mod = site$model, samp_mod = sample$model,
-                                  num.mcmc = num.mcmc, beta_bin = beta_bin))
-  }
+  empty.df <- data.frame(
+    site = unique(wide_data$site) %>% rep(., J) %>% rep(., K) %>% factor(),
+    sample = J %>% sapply(., FUN = function(x) 1:x, simplify = FALSE) %>% unlist() %>% rep(., K) %>% factor(),
+    rep = K %>% sapply(., FUN = function(x) 1:x, simplify = FALSE) %>% unlist() %>% factor()
+  )
+  out <- list(beta = beta.mcmc, alpha = alpha.mcmc, delta = delta.mcmc, psi = psi.mcmc, theta = theta.mcmc, p = p.mcmc,
+              model.info = list(X = X, W = W, V = V, M = M, J = J, K = K, z = z.mcmc,
+                                z.vec = z.vec.mcmc, A = A.mcmc, Y = Y, y = y,
+                                site_mod = site$model, samp_mod = sample$model, rep_mod = rep$model,
+                                num.mcmc = num.mcmc, beta_bin = beta_bin, df = empty.df))
 
   # remove unused things
   if(all(out$beta == 0)) out[['beta']] <- NULL
   if(all(out$alpha == 0)) out[['alpha']] <- NULL
+  if(all(out$delta == 0)) out[['delta']] <- NULL
   if(all(out$psi == .5)) out[['psi']] <- NULL
   if(all(out$theta == .5)) out[['theta']] <- NULL
+  if(all(out$p == .5)) out[['p']] <- NULL
 
+  class(out) <- c('msocc', class(out))
   return(out)
 }

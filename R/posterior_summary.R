@@ -1,9 +1,9 @@
 #'@title Summarize posterior samples
 #'
 #'@description This function allows for easy summaries of the posterior samples
-#'  drawn by \code{\link{MSOcc_mod}}.
+#'  drawn by \code{\link{msocc_mod}}.
 #'
-#'@param MSOcc_mod output from \code{\link{MSOcc_mod}}
+#'@param msocc_mod output from \code{\link{msocc_mod}} (object of class \code{msocc})
 #'@param burnin number of samples to discard as burnin when summarizing the
 #'  posterior
 #'@param print should summaries be printed in the console?
@@ -11,92 +11,115 @@
 #'  design should be summarized?
 #'@param quantiles vector of quantiles for credibility intervals
 #'@param n number of rows to print in the console for the posterior summary
+#'@param unique should only unique rows be printed?
 #'
-#'@return object of class \code{tbl} providing summaries of the posterior
+#'@return object of class \code{data.frame} providing summaries of the posterior
+#'  organized by site, sample, and replicate.
 #'
 #'@example examples/posterior_summary_ex.R
+#'@export
 
-posterior_summary <- function(MSOcc_mod, burnin = 0, print = T, level = 'overall', quantiles = c(0.025, 0.975),
-                              n = 'all'){
-  old <- options(tibble.print_max = 20, tibble.print_min = 10)
+posterior_summary <- function(msocc_mod, burnin = 0, print = F, level = 'overall', quantiles = c(0.025, 0.975),
+                              unique = T){
+  # error check
+  if(!(level %in% c("overall", "site", "sample", "rep"))){
+    stop('level should be set to one of: overall, site, sample, rep.')
+  }
+  if(!('msocc' %in% class(msocc_mod))) stop('msocc_mod should be an object of class msocc.')
 
-  options(tibble.print_max = n, tibble.print_min = 10)
   #pull model info
-  num.mcmc <- MSOcc_mod$model.info$num.mcmc
-  M <- MSOcc_mod$model.info$M
-  J <- MSOcc_mod$model.info$J
-  K <- MSOcc_mod$model.info$K
+  num.mcmc <- msocc_mod$model.info$num.mcmc
+  M <- msocc_mod$model.info$M
+  J <- msocc_mod$model.info$J
+  K <- msocc_mod$model.info$K
 
   #convert MCMC samples to probability, accounting for burnin
-  psi.mcmc <- as.matrix(psi_mcmc(MSOcc_mod)[(burnin+1):num.mcmc,], ncol = M)
-  theta.mcmc <- theta_mcmc(MSOcc_mod)[(burnin+1):num.mcmc,]
-  p.mcmc <- MSOcc_mod$p[(burnin+1):num.mcmc]
+  psi.mcmc <- psi_mcmc(msocc_mod)[(burnin+1):num.mcmc,]
+  theta.mcmc <- theta_mcmc(msocc_mod)[(burnin+1):num.mcmc,]
+  p.mcmc <- p_mcmc(msocc_mod)[(burnin+1):num.mcmc,]
 
   if(level == "overall"){
     #build summary table
-    site_sample <- colnames(theta.mcmc)
-    psi <- rep(apply(psi.mcmc, 2, median), J)
+    psi <- apply(psi.mcmc, 2, median)
     theta <- apply(theta.mcmc, 2, median)
-    p <- rep(median(p.mcmc), sum(J))
-    sum_tbl <- tibble::tibble(site_sample, psi, theta, p)
+    p <- apply(p.mcmc, 2, median)
+    sum_tbl <- msocc_mod$model.info$df %>%
+      dplyr::mutate(psi = psi, theta = theta, p = p)
+    sum_tbl.unique <- sum_tbl %>% dplyr::distinct(site, psi, theta, p, .keep_all = TRUE)
 
     #print table
     if(print){
       cat(paste('Overall summary of occupancy given by posterior medians: \n'))
     }
-    return(sum_tbl)
   }
   if(level == "site"){
     #build table
-    site_sample <- colnames(theta.mcmc)
-    mean <- rep(apply(psi.mcmc, 2, mean), J)
-    median <- rep(apply(psi.mcmc, 2, median), J)
-    lwr <- rep(apply(psi.mcmc, 2, quantile, probs = quantiles[1]), J)
-    upr <- rep(apply(psi.mcmc, 2, quantile, probs = quantiles[2]), J)
-    sum_tbl <- tibble::tibble(site_sample, median, mean, lwr, upr)
-    names(sum_tbl)[4:5] <- c(noquote(as.character(quantiles)))
+    mean <- apply(psi.mcmc, 2, mean)
+    median <- apply(psi.mcmc, 2, median)
+    lwr <- apply(psi.mcmc, 2, quantile, probs = quantiles[1])
+    upr <- apply(psi.mcmc, 2, quantile, probs = quantiles[2])
+
+    sum_tbl <- msocc_mod$model.info$df %>%
+      dplyr::mutate(median = median,
+                    mean = mean,
+                    lwr = lwr,
+                    upr = upr) %>%
+      dplyr::select(-sample, -rep) %>%
+      dplyr::distinct()
+    sum_tbl.unique <- sum_tbl %>% dplyr::distinct(site, median, mean, lwr, upr, .keep_all = TRUE)
+    names(sum_tbl)[4:5] <- names(sum_tbl.unique)[4:5] <- c(noquote(as.character(quantiles)))
+
 
     #print table
     if(print){
       cat(paste('Posterior summary of occupancy at the site: \n'))
     }
-    return(sum_tbl)
   }
   if(level == "sample"){
     #build table
-    site_sample <- colnames(theta.mcmc)
     mean <- apply(theta.mcmc, 2, mean)
     median <- apply(theta.mcmc, 2, median)
     lwr <- apply(theta.mcmc, 2, quantile, probs = quantiles[1])
     upr <- apply(theta.mcmc, 2, quantile, probs = quantiles[2])
-    sum_tbl <- tibble::tibble(site_sample, median, mean, lwr, upr)
-    names(sum_tbl)[4:5] <- c(noquote(as.character(quantiles)))
+
+    sum_tbl <- msocc_mod$model.info$df %>%
+      dplyr::mutate(median = median,
+                    mean = mean,
+                    lwr = lwr,
+                    upr = upr)
+    sum_tbl.unique <- sum_tbl %>% dplyr::distinct(site, mean, median, lwr, upr, .keep_all = TRUE)
+    names(sum_tbl)[6:7] <- names(sum_tbl.unique)[6:7] <- c(noquote(as.character(quantiles)))
 
     #print table
     if(print){
       cat(paste('Posterior summary of occupancy at the sample: \n'))
     }
-    return(sum_tbl)
   }
   if(level == "rep"){
-    p.mcmc <- matrix(p.mcmc, ncol = 1) #currently assumes fixed p
-    #build table
-    site_sample <- colnames(theta.mcmc)
-    mean <- rep(apply(p.mcmc, 2, mean), sum(J))
-    median <- rep(apply(p.mcmc, 2, median), sum(J))
-    lwr <- rep(apply(p.mcmc, 2, quantile, probs = quantiles[1]), sum(J))
-    upr <- rep(apply(p.mcmc, 2, quantile, probs = quantiles[2]), sum(J))
-    sum_tbl <- tibble::tibble(site_sample, median, mean, lwr, upr)
-    names(sum_tbl)[4:5] <- c(noquote(as.character(quantiles)))
+    mean <- apply(p.mcmc, 2, mean)
+    median <- apply(p.mcmc, 2, median)
+    lwr <- apply(p.mcmc, 2, quantile, probs = quantiles[1])
+    upr <- apply(p.mcmc, 2, quantile, probs = quantiles[2])
+
+    sum_tbl <- msocc_mod$model.info$df %>%
+      dplyr::mutate(median = median,
+                    mean = mean,
+                    lwr = lwr,
+                    upr = upr)
+    sum_tbl.unique <- sum_tbl %>% dplyr::distinct(site, mean, median, lwr, upr, .keep_all = TRUE)
+    names(sum_tbl)[6:7] <- names(sum_tbl.unique)[6:7] <- c(noquote(as.character(quantiles)))
 
     #print table
     if(print){
       cat(paste('Posterior summary of detection in a replicate: \n'))
     }
-    return(sum_tbl)
   }
-  if(!(level %in% c("overall", "site", "sample", "rep"))){
-    stop('level should be set to one of: overall, site, sample, rep.')
+
+  if(unique){
+    out <- sum_tbl.unique
+  } else{
+    out <- sum_tbl
   }
-  on.exit(options(old), add = TRUE)
+
+  return(out)
 }
