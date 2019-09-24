@@ -14,6 +14,7 @@ LazyData: true
 Imports: 
     dplyr,
     pgdraw,
-    magrittr
+    magrittr,
+    mvtnorm
 RoxygenNote: 6.1.1
 Type: Package
