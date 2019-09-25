@@ -5,6 +5,7 @@
 #'@author
 #'**Maintainer:** Christian Stratton \email{christianstratton@@montana.edu} \cr \cr
 #'Authors:
+#'  * Christian Stratton
 #'  * Dr. Andrew Hoegh
 #'  * Dr. Adam Sepulveda
 #'  * Dr. Katharine Banner

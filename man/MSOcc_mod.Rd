@@ -129,16 +129,19 @@ combination)
 }
 \description{
 This function fits the Bayesian multi-scale occupancy model
-described by Dorazio and Erickson (2017) using the polya-gamma data
-augmentation strategy described by Polson et al. (2012). Note that this
-documentation assumes there are \eqn{M} sites, \eqn{J_i} samples within each
-site, and \eqn{K_{ij}} replicates from each sample.
+described by \href{https://pubs.er.usgs.gov/publication/70194000}{Dorazio
+and Erickson (2017)} using the polya-gamma data augmentation strategy
+described by \href{https://arxiv.org/pdf/1205.0310.pdf}{Polson et al.
+(2012)}. Note that this documentation assumes there are \eqn{M} sites,
+\eqn{J_i} samples within each site, and \eqn{K_{ij}} replicates from each
+sample.
 }
 \details{
 This function fits the multi-scale occupancy model described by
-Dorazio and Erickson (2017). However, this function implements a fully
-Bayesian sampler based on the data augmentation strategy described by Polson
-et al. (2012).
+\href{https://pubs.er.usgs.gov/publication/70194000}{Dorazio and Erickson
+(2017)}. However, this function implements a fully Bayesian sampler based on
+the data augmentation strategy described by
+\href{https://arxiv.org/pdf/1205.0310.pdf}{Polson et al. (2012)}
 }
 \examples{
 data(fung)

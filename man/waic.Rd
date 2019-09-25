@@ -16,8 +16,9 @@ calculating the waic}
 numeric value that is the waic
 }
 \description{
-This function computes the waic described in Gelman et al. (2013)
- for multi-scale occupancy models.
+This function computes the waic described in
+ \href{https://link.springer.com/article/10.1007/s11222-013-9416-2}{Gelman et
+ al. (2013) information criterion paper} for multi-scale occupancy models.
 }
 \details{
 The authors of Gelman et al. (2013) note that the type 2 penalty is a

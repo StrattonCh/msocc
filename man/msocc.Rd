@@ -18,6 +18,7 @@ Useful links:
 \strong{Maintainer:} Christian Stratton \email{christianstratton@montana.edu} \cr \cr
 Authors:
 \itemize{
+\item Christian Stratton
 \item Dr. Andrew Hoegh
 \item Dr. Adam Sepulveda
 \item Dr. Katharine Banner

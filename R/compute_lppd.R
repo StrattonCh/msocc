@@ -1,7 +1,9 @@
 #'@title Compute log pointwise predictive density
 #'
-#'@description This function computes the log pointwise predictive density (lppd)
-#'  described in Gelman et al. (2013) for multi-scale occupancy models.
+#'@description This function computes the log pointwise predictive density
+#'  (lppd) described in
+#'  \href{https://link.springer.com/article/10.1007/s11222-013-9416-2}{Gelman et
+#'  al. (2013)} for multi-scale occupancy models.
 #'
 #'@param msocc_mod output from \code{\link{msocc_mod}}
 #'

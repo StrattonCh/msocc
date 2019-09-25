@@ -1,7 +1,8 @@
 #'@title Compute waic
 #'
-#'@description This function computes the waic described in Gelman et al. (2013)
-#'  for multi-scale occupancy models.
+#'@description This function computes the waic described in
+#'  \href{https://link.springer.com/article/10.1007/s11222-013-9416-2}{Gelman et
+#'  al. (2013) information criterion paper} for multi-scale occupancy models.
 #'
 #'@param msocc_mod output from \code{\link{msocc_mod}}
 #'@param type one of \code{c(1, 2)} denoting the type of penalty to use when

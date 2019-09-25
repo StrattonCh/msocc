@@ -14,5 +14,7 @@ numeric value that is the pwaic1
 }
 \description{
 This function computes the type 1 penalty for waic (pwaic1)
- described in Gelman et al. (2013) for multi-scale occupancy models.
+ described in
+ \href{https://link.springer.com/article/10.1007/s11222-013-9416-2}{Gelman et
+ al. (2013) information criterion paper} for multi-scale occupancy models.
 }

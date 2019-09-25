@@ -68,7 +68,6 @@
 #'@param seed optional seed for reproducible samples
 #'@param beta_bin optional; should a beta-binomial sampler be used when possible? This option is considerably faster.
 #'
-#'@example examples/MSOcc_mod_ex.R
 #'
 #'@return object of class \code{list} containing the following elements: \cr
 #'  * \code{beta} an object of class \code{matrix} of samples from the joint
@@ -113,6 +112,8 @@ MSOcc_mod <- function(wide_data,
                                                   Sigma0 = 25),
                                     rep = list(a0 = 1, b0 = 1)),
                       num.mcmc = 10000, progress = T, print = NULL, seed = NULL, beta_bin = F){
+
+  .Deprecated("msocc_mod")
 
   # set optional seed
   if(!is.null(seed)){

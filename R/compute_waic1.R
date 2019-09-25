@@ -1,7 +1,9 @@
 #'@title Compute type 1 waic penalty
 #'
 #'@description This function computes the type 1 penalty for waic (pwaic1)
-#'  described in Gelman et al. (2013) for multi-scale occupancy models.
+#'  described in
+#'  \href{https://link.springer.com/article/10.1007/s11222-013-9416-2}{Gelman et
+#'  al. (2013) information criterion paper} for multi-scale occupancy models.
 #'
 #'@param msocc_mod output from \code{\link{msocc_mod}}
 #'
