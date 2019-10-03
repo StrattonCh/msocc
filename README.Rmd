@@ -24,8 +24,42 @@ To showcase the utility of this package, we begin with a simple example where th
 
 ```{r, include = F}
 library(msocc)
+set.seed(10022019)
 ```
 
-```{r}
-sim <- msocc_sim(M = 10, J = 5, K = 5)
+```{r, comment = NA}
+sim <- msocc_sim(M = 10, J = 5, K = 5, psi = 0.8, theta = 0.75, p = 0.9)
+str(sim)
 ```
+
+To generate these data, we have to specify all the occupancy parameters. Here, we chose to set the probability of presence at the site to be 0.8, the probability of occurence in the sample (conditional on presence at the site) to be 0.75, and the probability of detection in the replicate (conditional on occurence in the sample) to be 0.9. The simulated data takes the following form:
+
+```{r, comment = NA}
+head(sim$resp)
+```
+
+To fit a model to these data, we use the `msocc_mod` function. 
+
+```{r, comment = NA}
+mod <- msocc_mod(wide_data = sim$resp,
+                 site = list(model = ~ 1, cov_tbl = sim$site),
+                 sample = list(model = ~ 1, cov_tbl = sim$sample),
+                 rep = list(model = ~ 1, cov_tbl = sim$rep),
+                 progress = F)
+```
+
+Within `msocc_mod`, we need to specify the `site`, `sample`, and `rep` lists which define the models to be fit at each level of the hierarchy. In this case, we are fitting only an intercept at each level which implies a constant probability of presence, occurence, and detection. For numerical summaries of this model, we can use `posterior_summary`. First, an overall summary.
+
+```{r, comment = NA}
+posterior_summary(mod, print = T)
+```
+
+By default, `posterior_summary` returns only the unique combinations of psi, theta, and p, but always returns a row for each site. Based on these estimates, our model returned estimates consistent with the parameter values we used to generate the data. For a more in-depth look at each of the site, sample, and replicate levels and a description of uncertainty, we can specify the `level` in `posterior_summary`. 
+
+```{r, comment = NA}
+posterior_summary(mod, level = 'site', print = T)
+posterior_summary(mod, level = 'sample', print = T)
+posterior_summary(mod, level = 'rep', print = T)
+```
+
+
