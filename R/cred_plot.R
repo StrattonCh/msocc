@@ -42,10 +42,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
       title <- paste0(cred.lvl, '% credibility intervals for psi by site')
       out <- plot.df %>%
         ggplot2::ggplot() +
-        ggplot2::geom_point(aes(x = lwr, y = site), shape = "|", size = 3, color = 'black') +
-        ggplot2::geom_point(aes(x = upr, y = site), shape = "|", size = 3, color = 'black') +
-        ggplot2::geom_segment(aes(x = lwr, y = site, xend = upr, yend = site), linetype = 'dashed') +
-        ggplot2::geom_point(aes(y = site, x = mean), shape = 1) +
+        ggplot2::geom_point(ggplot2::aes(x = lwr, y = site), shape = "|", size = 3, color = 'black') +
+        ggplot2::geom_point(ggplot2::aes(x = upr, y = site), shape = "|", size = 3, color = 'black') +
+        ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site, xend = upr, yend = site), linetype = 'dashed') +
+        ggplot2::geom_point(ggplot2::aes(y = site, x = mean), shape = 1) +
         ggplot2::labs(title = title,
              x = 'psi',
              y = 'site') +
@@ -55,9 +55,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
         truth.df <- data.frame(site = tmp$site, truth = truth)
         check.df <- data.frame(site = tmp$site, psi = -.05, col = ifelse(truth >= plot.df$lwr & truth <= plot.df$upr, 'green', 'red'))
         out <- out +
-          ggplot2::geom_point(data = truth.df, aes(x = truth, y = site), shape = 16) +
+          ggplot2::geom_point(data = truth.df, ggplot2::aes(x = truth, y = site), shape = 16) +
           ggplot2::xlim(-0.05, 1) +
-          ggplot2::geom_point(data = check.df, aes(x = psi, y = site), shape = 15, size = 2, color = check.df$col)
+          ggplot2::geom_point(data = check.df, ggplot2::aes(x = psi, y = site), shape = 15, size = 2, color = check.df$col)
       } else{
         out <- out + ggplot2::xlim(0, 1)
       }
@@ -75,10 +75,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
         title <- paste0(cred.lvl, '% credibility intervals for psi by site')
         out <- plot.df %>%
           ggplot2::ggplot() +
-          ggplot2::geom_point(aes(x = lwr, y = site), shape = "|", size = 3, color = 'black') +
-          ggplot2::geom_point(aes(x = upr, y = site), shape = "|", size = 3, color = 'black') +
-          ggplot2::geom_segment(aes(x = lwr, y = site, xend = upr, yend = site), linetype = 'dashed') +
-          ggplot2::geom_point(aes(y = site, x = mean), shape = 1) +
+          ggplot2::geom_point(ggplot2::aes(x = lwr, y = site), shape = "|", size = 3, color = 'black') +
+          ggplot2::geom_point(ggplot2::aes(x = upr, y = site), shape = "|", size = 3, color = 'black') +
+          ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site, xend = upr, yend = site), linetype = 'dashed') +
+          ggplot2::geom_point(ggplot2::aes(y = site, x = mean), shape = 1) +
           ggplot2::labs(title = title,
                x = 'psi',
                y = 'site') +
@@ -88,9 +88,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           truth.df <- data.frame(site = tmp$site, truth = truth)
           check.df <- data.frame(site = tmp$site, psi = -.05, col = ifelse(truth >= plot.df$lwr & truth <= plot.df$upr, 'green', 'red'))
           out <- out +
-            ggplot2::geom_point(data = truth.df, aes(x = truth, y = site), shape = 16) +
+            ggplot2::geom_point(data = truth.df, ggplot2::aes(x = truth, y = site), shape = 16) +
             ggplot2::xlim(-0.05, 1) +
-            ggplot2::geom_point(data = check.df, aes(x = psi, y = site), shape = 15, size = 2, color = check.df$col)
+            ggplot2::geom_point(data = check.df, ggplot2::aes(x = psi, y = site), shape = 15, size = 2, color = check.df$col)
         } else{
           out <- out + ggplot2::xlim(0, 1)
         }
@@ -125,10 +125,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           plot.df <- df.list[[i]]
           out[[i]] <- plot.df %>%
             ggplot2::ggplot() +
-            ggplot2::geom_point(aes(x = lwr, y = site), shape = "|", size = 3, color = 'black') +
-            ggplot2::geom_point(aes(x = upr, y = site), shape = "|", size = 3, color = 'black') +
-            ggplot2::geom_segment(aes(x = lwr, y = site, xend = upr, yend = site), linetype = 'dashed') +
-            ggplot2::geom_point(aes(y = site, x = mean), shape = 1) +
+            ggplot2::geom_point(ggplot2::aes(x = lwr, y = site), shape = "|", size = 3, color = 'black') +
+            ggplot2::geom_point(ggplot2::aes(x = upr, y = site), shape = "|", size = 3, color = 'black') +
+            ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site, xend = upr, yend = site), linetype = 'dashed') +
+            ggplot2::geom_point(ggplot2::aes(y = site, x = mean), shape = 1) +
             ggplot2::labs(title = title,
                  x = 'psi',
                  y = 'site') +
@@ -137,9 +137,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           if(!is.null(truth)){
             check.df <- data.frame(site = plot.df$site, psi = -.05, col = ifelse(plot.df$truth >= plot.df$lwr & plot.df$truth <= plot.df$upr, 'green', 'red'))
             out[[i]] <- out[[i]] +
-              ggplot2::geom_point(data = plot.df, aes(x = truth, y = site), shape = 16) +
+              ggplot2::geom_point(data = plot.df, ggplot2::aes(x = truth, y = site), shape = 16) +
               ggplot2::xlim(-0.05, 1) +
-              ggplot2::geom_point(data = check.df, aes(x = psi, y = site), shape = 15, size = 2, color = check.df$col)
+              ggplot2::geom_point(data = check.df, ggplot2::aes(x = psi, y = site), shape = 15, size = 2, color = check.df$col)
           } else{
             out[[i]] <- out[[i]] + ggplot2::xlim(0, 1)
           }
@@ -164,10 +164,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
       title <- paste0(cred.lvl, '% credibility intervals for theta by site-sample combination')
       out <- plot.df %>%
         ggplot2::ggplot() +
-        ggplot2::geom_point(aes(x = lwr, y = site_sample), shape = "|", size = 3, color = 'black') +
-        ggplot2::geom_point(aes(x = upr, y = site_sample), shape = "|", size = 3, color = 'black') +
-        ggplot2::geom_segment(aes(x = lwr, y = site_sample, xend = upr, yend = site_sample), linetype = 'dashed') +
-        ggplot2::geom_point(aes(y = site_sample, x = mean), shape = 1) +
+        ggplot2::geom_point(ggplot2::aes(x = lwr, y = site_sample), shape = "|", size = 3, color = 'black') +
+        ggplot2::geom_point(ggplot2::aes(x = upr, y = site_sample), shape = "|", size = 3, color = 'black') +
+        ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site_sample, xend = upr, yend = site_sample), linetype = 'dashed') +
+        ggplot2::geom_point(ggplot2::aes(y = site_sample, x = mean), shape = 1) +
         ggplot2::labs(title = title,
              x = 'theta',
              y = 'site_sample') +
@@ -177,9 +177,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
         truth.df <- data.frame(site = plot.df$site_sample, truth = truth)
         check.df <- data.frame(site = plot.df$site_sample, theta = -.05, col = ifelse(truth >= plot.df$lwr & truth <= plot.df$upr, 'green', 'red'))
         out <- out +
-          ggplot2::geom_point(data = truth.df, aes(x = truth, y = site), shape = 16) +
+          ggplot2::geom_point(data = truth.df, ggplot2::aes(x = truth, y = site), shape = 16) +
           ggplot2::xlim(-0.05, 1) +
-          ggplot2::geom_point(data = check.df, aes(x = theta, y = site), shape = 15, size = 2, color = check.df$col)
+          ggplot2::geom_point(data = check.df, ggplot2::aes(x = theta, y = site), shape = 15, size = 2, color = check.df$col)
       } else{
         out <- out + ggplot2::xlim(0,1)
       }
@@ -199,10 +199,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
         title <- paste0(cred.lvl, '% credibility intervals for theta by site-sample combination')
         out <- plot.df %>%
           ggplot2::ggplot() +
-          ggplot2::geom_point(aes(x = lwr, y = site_sample), shape = "|", size = 3, color = 'black') +
-          ggplot2::geom_point(aes(x = upr, y = site_sample), shape = "|", size = 3, color = 'black') +
-          ggplot2::geom_segment(aes(x = lwr, y = site_sample, xend = upr, yend = site_sample), linetype = 'dashed') +
-          ggplot2::geom_point(aes(y = site_sample, x = mean), shape = 1) +
+          ggplot2::geom_point(ggplot2::aes(x = lwr, y = site_sample), shape = "|", size = 3, color = 'black') +
+          ggplot2::geom_point(ggplot2::aes(x = upr, y = site_sample), shape = "|", size = 3, color = 'black') +
+          ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site_sample, xend = upr, yend = site_sample), linetype = 'dashed') +
+          ggplot2::geom_point(ggplot2::aes(y = site_sample, x = mean), shape = 1) +
           ggplot2::labs(title = title,
                x = 'theta',
                y = 'site_sample') +
@@ -212,9 +212,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           truth.df <- data.frame(site = plot.df$site_sample, truth = truth)
           check.df <- data.frame(site = plot.df$site_sample, theta = -.05, col = ifelse(truth >= plot.df$lwr & truth <= plot.df$upr, 'green', 'red'))
           out <- out +
-            ggplot2::geom_point(data = truth.df, aes(x = truth, y = site), shape = 16) +
+            ggplot2::geom_point(data = truth.df, ggplot2::aes(x = truth, y = site), shape = 16) +
             ggplot2::xlim(-0.05, 1) +
-            ggplot2::geom_point(data = check.df, aes(x = theta, y = site), shape = 15, size = 2, color = check.df$col)
+            ggplot2::geom_point(data = check.df, ggplot2::aes(x = theta, y = site), shape = 15, size = 2, color = check.df$col)
         } else{
           out <- out + ggplot2::xlim(0,1)
         }
@@ -247,10 +247,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           plot.df <- df.list[[i]]
           out[[i]] <- plot.df %>%
             ggplot2::ggplot() +
-            ggplot2::geom_point(aes(x = lwr, y = site_sample), shape = "|", size = 3, color = 'black') +
-            ggplot2::geom_point(aes(x = upr, y = site_sample), shape = "|", size = 3, color = 'black') +
-            ggplot2::geom_segment(aes(x = lwr, y = site_sample, xend = upr, yend = site_sample), linetype = 'dashed') +
-            ggplot2::geom_point(aes(y = site_sample, x = mean), shape = 1) +
+            ggplot2::geom_point(ggplot2::aes(x = lwr, y = site_sample), shape = "|", size = 3, color = 'black') +
+            ggplot2::geom_point(ggplot2::aes(x = upr, y = site_sample), shape = "|", size = 3, color = 'black') +
+            ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site_sample, xend = upr, yend = site_sample), linetype = 'dashed') +
+            ggplot2::geom_point(ggplot2::aes(y = site_sample, x = mean), shape = 1) +
             ggplot2::labs(title = title,
                  x = 'theta',
                  y = 'site_sample') +
@@ -259,9 +259,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           if(!is.null(truth)){
             check.df <- data.frame(site_sample = plot.df$site_sample, theta = -.05, col = ifelse(plot.df$truth >= plot.df$lwr & plot.df$truth <= plot.df$upr, 'green', 'red'))
             out[[i]] <- out[[i]] +
-              ggplot2::geom_point(data = plot.df, aes(x = truth, y = site_sample), shape = 16) +
+              ggplot2::geom_point(data = plot.df, ggplot2::aes(x = truth, y = site_sample), shape = 16) +
               ggplot2::xlim(-0.05, 1) +
-              ggplot2::geom_point(data = check.df, aes(x = theta, y = site_sample), shape = 15, size = 2, color = check.df$col)
+              ggplot2::geom_point(data = check.df, ggplot2::aes(x = theta, y = site_sample), shape = 15, size = 2, color = check.df$col)
           } else{
             out[[i]] <- out[[i]] + ggplot2::xlim(0, 1)
           }
@@ -286,10 +286,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
       title <- paste0(cred.lvl, '% credibility intervals for p by site-sample-rep combination')
       out <- plot.df %>%
         ggplot2::ggplot() +
-        ggplot2::geom_point(aes(x = lwr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
-        ggplot2::geom_point(aes(x = upr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
-        ggplot2::geom_segment(aes(x = lwr, y = site_sample_rep, xend = upr, yend = site_sample_rep), linetype = 'dashed') +
-        ggplot2::geom_point(aes(y = site_sample_rep, x = mean), shape = 1) +
+        ggplot2::geom_point(ggplot2::aes(x = lwr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
+        ggplot2::geom_point(ggplot2::aes(x = upr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
+        ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site_sample_rep, xend = upr, yend = site_sample_rep), linetype = 'dashed') +
+        ggplot2::geom_point(ggplot2::aes(y = site_sample_rep, x = mean), shape = 1) +
         ggplot2::labs(title = title,
              x = 'p',
              y = 'site_sample_rep') +
@@ -299,9 +299,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
         truth.df <- data.frame(site = plot.df$site_sample_rep, truth = truth)
         check.df <- data.frame(site = plot.df$site_sample_rep, p = -.05, col = ifelse(truth >= plot.df$lwr & truth <= plot.df$upr, 'green', 'red'))
         out <- out +
-          ggplot2::geom_point(data = truth.df, aes(x = truth, y = site), shape = 16) +
+          ggplot2::geom_point(data = truth.df, ggplot2::aes(x = truth, y = site), shape = 16) +
           ggplot2::xlim(-0.05, 1) +
-          ggplot2::geom_point(data = check.df, aes(x = p, y = site), shape = 15, size = 2, color = check.df$col)
+          ggplot2::geom_point(data = check.df, ggplot2::aes(x = p, y = site), shape = 15, size = 2, color = check.df$col)
       } else{
         out <- out + ggplot2::xlim(0,1)
       }
@@ -320,10 +320,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
         title <- paste0(cred.lvl, '% credibility intervals for p by site-sample-rep combination')
         out <- plot.df %>%
           ggplot2::ggplot() +
-          ggplot2::geom_point(aes(x = lwr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
-          ggplot2::geom_point(aes(x = upr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
-          ggplot2::geom_segment(aes(x = lwr, y = site_sample_rep, xend = upr, yend = site_sample_rep), linetype = 'dashed') +
-          ggplot2::geom_point(aes(y = site_sample_rep, x = mean), shape = 1) +
+          ggplot2::geom_point(ggplot2::aes(x = lwr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
+          ggplot2::geom_point(ggplot2::aes(x = upr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
+          ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site_sample_rep, xend = upr, yend = site_sample_rep), linetype = 'dashed') +
+          ggplot2::geom_point(ggplot2::aes(y = site_sample_rep, x = mean), shape = 1) +
           ggplot2::labs(title = title,
                x = 'p',
                y = 'site_sample_rep') +
@@ -333,9 +333,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           truth.df <- data.frame(site = plot.df$site_sample_rep, truth = truth)
           check.df <- data.frame(site = plot.df$site_sample_rep, p = -.05, col = ifelse(truth >= plot.df$lwr & truth <= plot.df$upr, 'green', 'red'))
           out <- out +
-            ggplot2::geom_point(data = truth.df, aes(x = truth, y = site), shape = 16) +
+            ggplot2::geom_point(data = truth.df, ggplot2::aes(x = truth, y = site), shape = 16) +
             ggplot2::xlim(-0.05, 1) +
-            ggplot2::geom_point(data = check.df, aes(x = p, y = site), shape = 15, size = 2, color = check.df$col)
+            ggplot2::geom_point(data = check.df, ggplot2::aes(x = p, y = site), shape = 15, size = 2, color = check.df$col)
         } else{
           out <- out + ggplot2::xlim(0,1)
         }
@@ -368,10 +368,10 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           plot.df <- df.list[[i]]
           out[[i]] <- plot.df %>%
             ggplot2::ggplot() +
-            ggplot2::geom_point(aes(x = lwr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
-            ggplot2::geom_point(aes(x = upr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
-            ggplot2::geom_segment(aes(x = lwr, y = site_sample_rep, xend = upr, yend = site_sample_rep), linetype = 'dashed') +
-            ggplot2::geom_point(aes(y = site_sample_rep, x = mean), shape = 1) +
+            ggplot2::geom_point(ggplot2::aes(x = lwr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
+            ggplot2::geom_point(ggplot2::aes(x = upr, y = site_sample_rep), shape = "|", size = 3, color = 'black') +
+            ggplot2::geom_segment(ggplot2::aes(x = lwr, y = site_sample_rep, xend = upr, yend = site_sample_rep), linetype = 'dashed') +
+            ggplot2::geom_point(ggplot2::aes(y = site_sample_rep, x = mean), shape = 1) +
             ggplot2::labs(title = title,
                  x = 'p',
                  y = 'site_sample_rep') +
@@ -380,9 +380,9 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
           if(!is.null(truth)){
             check.df <- data.frame(site_sample_rep = plot.df$site_sample_rep, p = -.05, col = ifelse(plot.df$truth >= plot.df$lwr & plot.df$truth <= plot.df$upr, 'green', 'red'))
             out[[i]] <- out[[i]] +
-              ggplot2::geom_point(data = plot.df, aes(x = truth, y = site_sample_rep), shape = 16) +
+              ggplot2::geom_point(data = plot.df, ggplot2::aes(x = truth, y = site_sample_rep), shape = 16) +
               ggplot2::xlim(-0.05, 1) +
-              ggplot2::geom_point(data = check.df, aes(x = p, y = site_sample_rep), shape = 15, size = 2, color = check.df$col)
+              ggplot2::geom_point(data = check.df, ggplot2::aes(x = p, y = site_sample_rep), shape = 15, size = 2, color = check.df$col)
           } else{
             out[[i]] <- out[[i]] + ggplot2::xlim(0, 1)
           }
