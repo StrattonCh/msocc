@@ -7,7 +7,7 @@ Consequently, the language in this package assumes this context. For
 more information on eDNA, see [Improved detection of rare, endangered
 and invasive trout in using a new large‐volume sampling method for eDNA
 capture](https://onlinelibrary.wiley.com/doi/epdf/10.1002/edn3.23) or
-[Adding invasive species biosurveillance to the U.S. GeologicalSurvey
+[Adding invasive species biosurveillance to the U.S. Geological Survey
 streamgage
 network](https://esajournals.onlinelibrary.wiley.com/doi/epdf/10.1002/ecs2.2843).
 
@@ -284,9 +284,9 @@ gridExtra::grid.arrange(cred.plots[[1]], cred.plots[[2]], nrow = 2, ncol = 1)
 ![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 These two graphics allow us to visualize the uncertainty in the
-posterior distribution of `theta` for each sample. Did these credibility
-intervals capture the value of `theta` that generated them in the
-simulation?
+posterior distribution of `theta` for each sample from the first two
+sites. Did these credibility intervals capture the value of `theta` that
+generated them in the simulation?
 
 ``` r
 cred.plots <- cred_plot(mod, level = 'sample', n = 20, truth = sim$params$theta)
