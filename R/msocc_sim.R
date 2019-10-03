@@ -223,8 +223,8 @@ msocc_sim <- function(M = 10, J = 5, K = 5, psi = .8, theta = .75, p = .9, seed 
                          rep = K %>% sapply(., FUN = function(x) 1:x, simplify = FALSE) %>% unlist() %>% factor())
   } else if(nrow(rep.df) == sum(J)){
     rep.df <- rep.df[rep(1:nrow(rep.df), K),] %>%
-      mutate(rep = K %>% sapply(., FUN = function(x) 1:x, simplify = FALSE) %>% unlist() %>% factor()) %>%
-      dplyr::select(site, sample, rep, everything())
+      dplyr::mutate(rep = K %>% sapply(., FUN = function(x) 1:x, simplify = FALSE) %>% unlist() %>% factor()) %>%
+      dplyr::select(site, sample, rep, dplyr::everything())
   }
 
   # resp df
@@ -234,7 +234,7 @@ msocc_sim <- function(M = 10, J = 5, K = 5, psi = .8, theta = .75, p = .9, seed 
   resp.df <- resp.df %>%
     dplyr::mutate(site = sample.df$site,
                   sample = sample.df$sample) %>%
-    dplyr::select(site, sample, everything())
+    dplyr::select(site, sample, dplyr::everything())
 
   # return
   out <- list(resp = resp.df, site = site.df, sample = sample.df, rep = rep.df,
