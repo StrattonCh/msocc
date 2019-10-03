@@ -1,0 +1,114 @@
+# constant psi, theta, p
+sim <- msocc_sim(M = 10, J = 5, K = 5)
+mod <- msocc_mod(wide_data = sim$resp,
+                 site = list(model = ~1, cov_tbl = sim$site),
+                 sample = list(model = ~1, cov_tbl = sim$sample),
+                 rep = list(model = ~1, cov_tbl = sim$rep),
+                 progress = F)
+posterior_summary(mod)
+cred_plot(mod, truth = sim$params$psi)
+cred_plot(mod, level = 'sample', truth = sim$params$theta)
+cred_plot(mod, level = "rep", truth = sim$params$p)
+
+# psi function of covariates, constant theta and p
+sim <- msocc_sim(M = 50, J = 5, K = 5,
+                 site.df = data.frame(site = 1:50, x = rnorm(50)),
+                 site.mod = ~x,
+                 beta = c(1,1))
+mod <- msocc_mod(wide_data = sim$resp,
+                 site = list(model = ~x, cov_tbl = sim$site),
+                 sample = list(model = ~1, cov_tbl = sim$sample),
+                 rep = list(model = ~1, cov_tbl = sim$rep),
+                 progress = F)
+posterior_summary(mod)
+cred_plot(mod, truth = sim$params$psi)
+cred_plot(mod, level = 'sample',truth = sim$params$theta, n = 10)
+cred_plot(mod, level = "rep", truth = sim$params$p, n = 10)
+
+# psi constant, theta function of covariates, p constant
+sim <- msocc_sim(M = 10, J = 20, K = 5,
+                 sample.df = data.frame(site = rep(1:10, each = 20),
+                                        sample = rep(1:20, 10),
+                                        x = rnorm(200)),
+                 sample.mod = ~x,
+                 alpha = c(1,1))
+mod <- msocc_mod(wide_data = sim$resp,
+                 site = list(model = ~1, cov_tbl = sim$site),
+                 sample = list(model = ~x, cov_tbl = sim$sample),
+                 rep = list(model = ~1, cov_tbl = sim$rep),
+                 progress = F)
+posterior_summary(mod)
+cred_plot(mod, level = 'site', truth = sim$params$psi)
+cred_plot(mod, level = 'sample', truth = sim$params$theta, n = 20)
+cred_plot(mod, level = 'rep', truth = sim$params$p)
+
+# psi constant, theta constant, p function of covariates at sample level
+rep.df <- data.frame(
+  site = rep(1:10, each = 5),
+  sample = rep(1:5, 10),
+  x = rnorm(50)
+)
+sim <- msocc_sim(M = 10, J = 5, K = 10,
+                 rep.df = rep.df,
+                 rep.mod = ~x,
+                 delta = c(1,1))
+mod <- msocc_mod(wide_data = sim$resp,
+                 site = list(model = ~1, cov_tbl = sim$site),
+                 sample = list(model = ~1, cov_tbl = sim$sample),
+                 rep = list(model = ~x, cov_tbl = sim$rep), beta_bin = T, progress = F)
+posterior_summary(mod)
+cred_plot(mod, level = 'site', truth = sim$params$psi)
+cred_plot(mod, level = 'sample', truth = sim$params$theta)
+cred_plot(mod, level = 'rep', n = 25, truth = unique(sim$params$p))
+
+# constant psi, theta, and p - unbalanced at sample level
+sim <- msocc_sim(M = 10, J = sample(c(4:5), 10, replace = T), K = 5)
+mod <- msocc_mod(wide_data = sim$resp,
+                 site = list(model = ~1, cov_tbl = sim$site),
+                 sample = list(model = ~1, cov_tbl = sim$sample),
+                 rep = list(model = ~1, cov_tbl = sim$rep),
+                 progress = F)
+posterior_summary(mod)
+cred_plot(mod, truth = sim$params$psi)
+cred_plot(mod, level = 'sample', truth = sim$params$theta)
+cred_plot(mod, level = "rep", truth = sim$params$p)
+
+# constant psi, theta, and p - unbalanced at sample and rep level
+num.sites <- 10
+num.samples <- sample(c(4:5), num.sites, replace = T)
+num.reps <- sample(c(5:8), sum(num.samples), replace = T)
+
+sim <- msocc_sim(M = num.sites, J = num.samples, K = num.reps)
+mod <- msocc_mod(wide_data = sim$resp,
+                 site = list(model = ~1, cov_tbl = sim$site),
+                 sample = list(model = ~1, cov_tbl = sim$sample),
+                 rep = list(model = ~1, cov_tbl = sim$rep),
+                 progress = F)
+posterior_summary(mod)
+cred_plot(mod, truth = sim$params$psi)
+cred_plot(mod, level = 'sample', truth = sim$params$theta)
+cred_plot(mod, level = "rep", truth = sim$params$p)
+
+# fungus example
+data(fung)
+
+# prep data
+fung.detect <- fung %>%
+  dplyr::select(1:4)
+
+site.df <- fung %>%
+  dplyr::select(-sample, -pcr1, -pcr2) %>%
+  dplyr::distinct(site, .keep_all = TRUE) %>%
+  dplyr::arrange(site)
+
+sample.df <- fung %>%
+  dplyr::select(-pcr1, -pcr2) %>%
+  dplyr::arrange(site, sample)
+
+# model sample level occurence by frog density
+fung_mod2 <- msocc_mod(wide_data = fung.detect, progress = T,
+                       site = list(model = ~ 1, cov_tbl = site.df),
+                       sample = list(model = ~ frogs, cov_tbl = sample.df),
+                       rep = list(model = ~ 1, cov_tbl = sample.df),
+                       num.mcmc = 1000, beta_bin = T)
+cred_plot(fung_mod2, level = 'sample')

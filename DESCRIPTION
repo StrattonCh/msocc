@@ -1,5 +1,5 @@
 Package: msocc
-Version: 1.0.0
+Version: 1.1.0
 Title: Package for Fitting and Analyzing Computationally Efficient Multi-scale Occupancy Models
 Description: This package allows for the fitting and analyzing of 
     computationally efficient multi-scale occupancy models using
