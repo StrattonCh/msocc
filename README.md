@@ -36,6 +36,8 @@ provides tools to simulate data from multi-scale occupancy models.
 
 ## Simulated examples
 
+### Constant psi, theta, and p
+
 To showcase the utility of this package, we begin with a simple example
 where there are 10 sites of interest, from which we collect 5 samples
 each and analyze 5 PCR replicates for the presence of the target DNA. To
@@ -197,3 +199,98 @@ posterior_summary(mod, level = 'rep', print = T)
 9     9      1   1 0.9131756 0.9106892 0.8603062 0.9487432
 10   10      1   1 0.9131756 0.9106892 0.8603062 0.9487432
 ```
+
+### Constant psi, theta as a function of covariates, constant p
+
+Next, we consider the case where the sample level occurence probability
+is a function of covariates. First, we generate the data.
+
+``` r
+sim <- msocc_sim(M = 10, J = 20, K = 5, psi = 0.8, p = 0.9,
+                 sample.df = data.frame(site = rep(1:10, each = 20),
+                                        sample = rep(1:20, 10),
+                                        x = rnorm(200)),
+                 sample.mod = ~x,
+                 alpha = c(1,1))
+str(sim)
+```
+
+    List of 5
+     $ resp  :'data.frame': 200 obs. of  7 variables:
+      ..$ site  : Factor w/ 10 levels "1","2","3","4",..: 1 1 1 1 1 1 1 1 1 1 ...
+      ..$ sample: Factor w/ 20 levels "1","2","3","4",..: 1 2 3 4 5 6 7 8 9 10 ...
+      ..$ pcr1  : int [1:200] 0 0 0 0 0 0 0 0 0 0 ...
+      ..$ pcr2  : int [1:200] 0 0 0 0 0 0 0 0 0 0 ...
+      ..$ pcr3  : int [1:200] 0 0 0 0 0 0 0 0 0 0 ...
+      ..$ pcr4  : int [1:200] 0 0 0 0 0 0 0 0 0 0 ...
+      ..$ pcr5  : int [1:200] 0 0 0 0 0 0 0 0 0 0 ...
+     $ site  :'data.frame': 10 obs. of  1 variable:
+      ..$ site: Factor w/ 10 levels "1","2","3","4",..: 1 2 3 4 5 6 7 8 9 10
+     $ sample:'data.frame': 200 obs. of  3 variables:
+      ..$ site  : Factor w/ 10 levels "1","2","3","4",..: 1 1 1 1 1 1 1 1 1 1 ...
+      ..$ sample: Factor w/ 20 levels "1","2","3","4",..: 1 2 3 4 5 6 7 8 9 10 ...
+      ..$ x     : num [1:200] 1.451 0.812 -1.362 -0.213 -0.496 ...
+     $ rep   :'data.frame': 1000 obs. of  3 variables:
+      ..$ site  : Factor w/ 10 levels "1","2","3","4",..: 1 1 1 1 1 1 1 1 1 1 ...
+      ..$ sample: Factor w/ 20 levels "1","2","3","4",..: 1 1 1 1 1 2 2 2 2 2 ...
+      ..$ rep   : Factor w/ 5 levels "1","2","3","4",..: 1 2 3 4 5 1 2 3 4 5 ...
+     $ params:List of 7
+      ..$ psi  : num 0.8
+      ..$ theta: num [1:200] 0.921 0.86 0.41 0.687 0.623 ...
+      ..$ p    : num 0.9
+      ..$ z    : int [1:10] 0 0 1 1 1 1 1 1 1 1
+      ..$ a    : int [1:200] 0 0 0 0 0 0 0 0 0 0 ...
+      ..$ z.vec: int [1:200] 0 0 0 0 0 0 0 0 0 0 ...
+      ..$ alpha: num [1:2, 1] 1 1
+
+To generate `theta` as a function of covariates, we specify the
+data.frame, model, and parameters needed to compute theta, defined as
+`theta = exp(W %*% alpha) / (1 = exp(W %*% alpha))`. Next, we fit the
+model and provide the first six rows of a numerical summary of it.
+
+``` r
+mod <- msocc_mod(wide_data = sim$resp,
+                 site = list(model = ~1, cov_tbl = sim$site),
+                 sample = list(model = ~x, cov_tbl = sim$sample),
+                 rep = list(model = ~1, cov_tbl = sim$rep),
+                 progress = F)
+head(posterior_summary(mod, print = T))
+```
+
+    Overall summary of occupancy given by posterior medians: 
+
+``` 
+  site sample rep       psi     theta         p
+1    1      1   1 0.7621707 0.9032636 0.9094752
+2    1      2   1 0.7621707 0.8343935 0.9094752
+3    1      3   1 0.7621707 0.3830389 0.9094752
+4    1      4   1 0.7621707 0.6534772 0.9094752
+5    1      5   1 0.7621707 0.5894737 0.9094752
+6    1      6   1 0.7621707 0.5382725 0.9094752
+```
+
+From the output above, we can see that we now have a unique value of
+`theta` for all 200 samples collected in this hypothetical experiment.
+Rather than looking through 200 rows of output to summarize the sample
+level occurence probabilities, we can plot these credibility intervals
+using `cred_plot`. In the code below, `n` controls how many samples are
+plotted on each plot.
+
+``` r
+cred.plots <- cred_plot(mod, level = 'sample', n = 20)
+gridExtra::grid.arrange(cred.plots[[1]], cred.plots[[2]], nrow = 2, ncol = 1)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+These two graphics allow us to visualize the uncertainty in the
+posterior distribution of `theta` for each sample. Did these credibility
+intervals capture the value of `theta` that generated them in the
+simulation?
+
+``` r
+cred.plots <- cred_plot(mod, level = 'sample', n = 20, truth = sim$params$theta)
+gridExtra::grid.arrange(cred.plots[[1]], cred.plots[[2]], nrow = 2, ncol = 1)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
