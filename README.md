@@ -41,8 +41,7 @@ provides tools to simulate data from multi-scale occupancy models.
 To showcase the utility of this package, we begin with a simple example
 where there are 10 sites of interest, from which we collect 5 samples
 each and analyze 5 PCR replicates for the presence of the target DNA. To
-simulated data consistent with this structure, we use the following
-code.
+simulate data consistent with this structure, we use the following code.
 
 ``` r
 sim <- msocc_sim(M = 10, J = 5, K = 5, psi = 0.8, theta = 0.75, p = 0.9)
@@ -80,7 +79,7 @@ Here, we chose to set the probability of presence at the site to be 0.8,
 the probability of occurence in the sample (conditional on presence at
 the site) to be 0.75, and the probability of detection in the replicate
 (conditional on occurence in the sample) to be 0.9. The simulated data
-takes the following form:
+take the following form:
 
 ``` r
 head(sim$resp)

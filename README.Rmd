@@ -22,7 +22,7 @@ The heavy lifting for this package is done with `msocc_mod`, which fits the mode
 ## Simulated examples
 
 ### Constant psi, theta, and p
-To showcase the utility of this package, we begin with a simple example where there are 10 sites of interest, from which we collect 5 samples each and analyze 5 PCR replicates for the presence of the target DNA. To simulated data consistent with this structure, we use the following code. 
+To showcase the utility of this package, we begin with a simple example where there are 10 sites of interest, from which we collect 5 samples each and analyze 5 PCR replicates for the presence of the target DNA. To simulate data consistent with this structure, we use the following code. 
 
 ```{r, include = F}
 library(msocc)
@@ -34,7 +34,7 @@ sim <- msocc_sim(M = 10, J = 5, K = 5, psi = 0.8, theta = 0.75, p = 0.9)
 str(sim)
 ```
 
-To generate these data, we have to specify all the occupancy parameters. Here, we chose to set the probability of presence at the site to be 0.8, the probability of occurence in the sample (conditional on presence at the site) to be 0.75, and the probability of detection in the replicate (conditional on occurence in the sample) to be 0.9. The simulated data takes the following form:
+To generate these data, we have to specify all the occupancy parameters. Here, we chose to set the probability of presence at the site to be 0.8, the probability of occurence in the sample (conditional on presence at the site) to be 0.75, and the probability of detection in the replicate (conditional on occurence in the sample) to be 0.9. The simulated data take the following form:
 
 ```{r, comment = NA}
 head(sim$resp)
