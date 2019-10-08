@@ -242,10 +242,10 @@ str(sim)
       ..$ z.vec: int [1:200] 0 0 0 0 0 0 0 0 0 0 ...
       ..$ alpha: num [1:2, 1] 1 1
 
-To generate `theta` as a function of covariates, we specify the
-data.frame, model, and parameters needed to compute theta, defined as
-`theta = exp(W %*% alpha) / (1 = exp(W %*% alpha))`. Next, we fit the
-model and provide the first six rows of a numerical summary of it.
+To generate `theta` as a function of covariates, we specify the data
+frame, model, and parameters needed to compute theta, defined as `theta
+= exp(W %*% alpha) / (1 + exp(W %*% alpha))`. Next, we fit the model and
+provide the first six rows of a numerical summary of it.
 
 ``` r
 mod <- msocc_mod(wide_data = sim$resp,

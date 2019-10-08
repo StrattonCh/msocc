@@ -77,7 +77,7 @@ sim <- msocc_sim(M = 10, J = 20, K = 5, psi = 0.8, p = 0.9,
 str(sim)
 ```
 
-To generate `theta` as a function of covariates, we specify the data.frame, model, and parameters needed to compute theta, defined as `theta = exp(W %*% alpha) / (1 = exp(W %*% alpha))`. Next, we fit the model and provide the first six rows of a numerical summary of it. 
+To generate `theta` as a function of covariates, we specify the data frame, model, and parameters needed to compute theta, defined as `theta = exp(W %*% alpha) / (1 + exp(W %*% alpha))`. Next, we fit the model and provide the first six rows of a numerical summary of it. 
 
 ```{r, comment = NA}
 mod <- msocc_mod(wide_data = sim$resp,
