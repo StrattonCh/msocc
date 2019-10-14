@@ -185,7 +185,7 @@ msocc_mod <- function(wide_data,
   # initialize z and A vectors based on data
   Y.mat <- as.matrix(wide_data[,-c(1:2)])
   y <- na.omit(c(t(Y.mat)))
-  wide_data$pcr.total <- rowSums(wide_data[,3:ncol(wide_data)], na.rm = T)
+  wide_data$pcr.total <- rowSums(matrix(wide_data[,3:ncol(wide_data)], nrow = nrow(wide_data)), na.rm = T)
   z.count <- unname(with(wide_data, tapply(pcr.total, site, sum)))
   z <- ifelse(z.count == 0, 0, 1)
   A <- ifelse(wide_data$pcr.total != 0, 1, 0)
