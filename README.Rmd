@@ -2,7 +2,7 @@
 output: github_document
 ---
 
-msocc is an R package for fitting and analyzing computationally efficient Bayesian multi-scale occupancy models. Its development was motivated by the use of environmental DNA (eDNA) for the monitoring of pathogens, parasites, and invasive species in the Yellowstone River. Consequently, the language in this package assumes this context. For more information on eDNA, see [Improved detection of rare, endangered and invasive trout in using a new large‐volume sampling method for eDNA capture](https://onlinelibrary.wiley.com/doi/epdf/10.1002/edn3.23) or [Adding invasive species biosurveillance to the U.S. Geological Survey streamgage network](https://esajournals.onlinelibrary.wiley.com/doi/epdf/10.1002/ecs2.2843). 
+msocc is an R package for fitting and analyzing computationally efficient Bayesian multi-scale occupancy models. Its development was motivated by the use of environmental DNA (eDNA) for the monitoring of pathogens, parasites, and invasive species in the Yellowstone River. Consequently, the language in this package assumes this context. For more information on eDNA in this context, see [Improved detection of rare, endangered and invasive trout in using a new large‐volume sampling method for eDNA capture](https://onlinelibrary.wiley.com/doi/epdf/10.1002/edn3.23) or [Adding invasive species biosurveillance to the U.S. Geological Survey streamgage network](https://esajournals.onlinelibrary.wiley.com/doi/epdf/10.1002/ecs2.2843). 
 
 # Installation instructions
 This package is still under development, but can be installed through GitHub using the following code:

@@ -5,7 +5,7 @@
 \title{Plot credibility intervals from an \code{msocc} fit}
 \usage{
 cred_plot(msocc, level = "site", truth = NULL, n = "all",
-  quantiles = c(0.025, 0.975))
+  quantiles = c(0.025, 0.975), burnin = 0)
 }
 \arguments{
 \item{msocc}{an object of class \code{msocc}}
@@ -17,6 +17,8 @@ cred_plot(msocc, level = "site", truth = NULL, n = "all",
 \item{n}{number of intervals to plot at once}
 
 \item{quantiles}{quantiles to determine the level of credibility}
+
+\item{burnin}{samples to discard as burn-in when summarizing the posterior}
 }
 \value{
 a \code{list} of ggplots

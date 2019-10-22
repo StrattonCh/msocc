@@ -13,6 +13,7 @@
 #'@param truth optional vector of values to compare to each credibility interval; see details
 #'@param n number of intervals to plot at once
 #'@param quantiles quantiles to determine the level of credibility
+#'@param burnin samples to discard as burn-in when summarizing the posterior
 #'
 #'@example examples/cred_plot_ex.R
 #'
@@ -23,13 +24,13 @@
 #'
 #'@md
 
-cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles = c(0.025, 0.975)){
+cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles = c(0.025, 0.975), burnin = 0){
 
   cred.lvl <- round(diff(quantiles) * 100)
 
   if(level == 'site'){
     if(n == 'all'){
-      tmp <- posterior_summary(msocc, level = 'site', quantiles = quantiles)
+      tmp <- posterior_summary(msocc, level = 'site', quantiles = quantiles, burnin = burnin)
       plot.df <- data.frame(
         site = tmp$site,
         mean = tmp$mean,
@@ -63,7 +64,7 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
       }
     } else{
 
-      tmp <- posterior_summary(msocc, level = 'site', quantiles = quantiles)
+      tmp <- posterior_summary(msocc, level = 'site', quantiles = quantiles, burnin = burnin)
       if(n > nrow(tmp)){
         plot.df <- data.frame(
           site = tmp$site,
@@ -151,7 +152,7 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
   if(level == 'sample'){
 
     if(n == 'all'){
-      tmp <- posterior_summary(msocc, level = 'sample', quantiles = quantiles)
+      tmp <- posterior_summary(msocc, level = 'sample', quantiles = quantiles, burnin = burnin)
       plot.df <- data.frame(
         site_sample = paste(tmp$site, tmp$sample, sep = "_"),
         mean = tmp$mean,
@@ -185,7 +186,7 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
       }
     } else{
 
-      tmp <- posterior_summary(msocc, level = 'sample', quantiles = quantiles)
+      tmp <- posterior_summary(msocc, level = 'sample', quantiles = quantiles, burnin = burnin)
       if(n > nrow(tmp)){
         plot.df <- data.frame(
           site_sample = paste(tmp$site, tmp$sample, sep = "_"),
@@ -273,7 +274,7 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
   if(level == 'rep'){
 
     if(n == 'all'){
-      tmp <- posterior_summary(msocc, level = 'rep', quantiles = quantiles)
+      tmp <- posterior_summary(msocc, level = 'rep', quantiles = quantiles, burnin = burnin)
       plot.df <- data.frame(
         site_sample_rep = paste(tmp$site, tmp$sample, tmp$rep, sep = "_"),
         mean = tmp$mean,
@@ -306,7 +307,7 @@ cred_plot <- function(msocc, level = 'site', truth = NULL, n = 'all', quantiles 
         out <- out + ggplot2::xlim(0,1)
       }
     } else{
-      tmp <- posterior_summary(msocc, level = 'rep', quantiles = quantiles)
+      tmp <- posterior_summary(msocc, level = 'rep', quantiles = quantiles, burnin = burnin)
       if(n > nrow(tmp)){
         plot.df <- data.frame(
           site_sample_rep = paste(tmp$site, tmp$sample, tmp$rep, sep = "_"),
