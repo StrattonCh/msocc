@@ -4,8 +4,14 @@
 \alias{cred_plot}
 \title{Plot credibility intervals from an \code{msocc} fit}
 \usage{
-cred_plot(msocc, level = "site", truth = NULL, n = "all",
-  quantiles = c(0.025, 0.975), burnin = 0)
+cred_plot(
+  msocc,
+  level = "site",
+  truth = NULL,
+  n = "all",
+  quantiles = c(0.025, 0.975),
+  burnin = 0
+)
 }
 \arguments{
 \item{msocc}{an object of class \code{msocc}}

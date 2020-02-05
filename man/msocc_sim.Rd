@@ -4,10 +4,24 @@
 \alias{msocc_sim}
 \title{Simulate data from a multi-scale occupancy model.}
 \usage{
-msocc_sim(M = 10, J = 5, K = 5, psi = 0.8, theta = 0.75,
-  p = 0.9, seed = NULL, site.df = NULL, site.mod = NULL,
-  beta = NULL, sample.df = NULL, sample.mod = NULL, alpha = NULL,
-  rep.df = NULL, rep.mod = NULL, delta = NULL)
+msocc_sim(
+  M = 10,
+  J = 5,
+  K = 5,
+  psi = 0.8,
+  theta = 0.75,
+  p = 0.9,
+  seed = NULL,
+  site.df = NULL,
+  site.mod = NULL,
+  beta = NULL,
+  sample.df = NULL,
+  sample.mod = NULL,
+  alpha = NULL,
+  rep.df = NULL,
+  rep.mod = NULL,
+  delta = NULL
+)
 }
 \arguments{
 \item{M}{integer; number of sites to simulate}

@@ -4,8 +4,14 @@
 \alias{posterior_summary}
 \title{Summarize posterior samples}
 \usage{
-posterior_summary(msocc_mod, burnin = 0, print = F,
-  level = "overall", quantiles = c(0.025, 0.975), unique = T)
+posterior_summary(
+  msocc_mod,
+  burnin = 0,
+  print = F,
+  level = "overall",
+  quantiles = c(0.025, 0.975),
+  unique = T
+)
 }
 \arguments{
 \item{msocc_mod}{output from \code{\link{msocc_mod}} (object of class \code{msocc})}

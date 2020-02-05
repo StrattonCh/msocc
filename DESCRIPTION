@@ -4,7 +4,7 @@ Title: Package for Fitting and Analyzing Computationally Efficient Multi-scale O
 Description: This package allows for the fitting and analyzing of 
     computationally efficient multi-scale occupancy models using
     the polya-gamma data augmentation strategy described by 
-    Polson et al. (2012). 
+    Polson et al. (2013). 
 Authors@R: c(
     person("Christian", "Stratton", email = "christianstratton@montana.edu", role = c("aut", "cre"))
     )
@@ -17,5 +17,5 @@ Imports:
     magrittr,
     mvtnorm,
     ggplot2
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Type: Package
