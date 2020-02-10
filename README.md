@@ -4,8 +4,9 @@ efficient Bayesian multi-scale occupancy models. Its development was
 motivated by the use of environmental DNA (eDNA) for the monitoring of
 pathogens, parasites, and invasive species in the Yellowstone River.
 Consequently, the language in this package assumes this context. For
-more information on eDNA, see [Improved detection of rare, endangered
-and invasive trout in using a new large‐volume sampling method for eDNA
+more information on eDNA in this context, see [Improved detection of
+rare, endangered and invasive trout in using a new large‐volume sampling
+method for eDNA
 capture](https://onlinelibrary.wiley.com/doi/epdf/10.1002/edn3.23) or
 [Adding invasive species biosurveillance to the U.S. Geological Survey
 streamgage
@@ -32,7 +33,9 @@ The heavy lifting for this package is done with `msocc_mod`, which fits
 the models. The results of this function are then passed to
 `posterior_summary` to numerically summarize the posterior distribution
 and `cred_plot` to visually summarize it. Additionally, this package
-provides tools to simulate data from multi-scale occupancy models.
+provides tools to simulate data from multi-scale occupancy models. This
+package has a companion R Shiny web application, available
+[here](https://christianstratton.shinyapps.io/eDNAapp/).
 
 ## Simulated examples
 
