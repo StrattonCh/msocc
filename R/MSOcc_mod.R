@@ -330,6 +330,7 @@ msocc_mod <- function(wide_data,
         z.prob[ndx] <- num / denom
       }
     }
+    z.prob <- round(z.prob, 8)
     z <- rbinom(M, 1, z.prob)
     z.mcmc[i,] <- c(z)
     z.vec <- rep(z, J)
@@ -348,6 +349,7 @@ msocc_mod <- function(wide_data,
         A.prob[ndx] <- num/denom
       }
     }
+    A.prob <- round(A.prob, 8)
     A <- rbinom(sum(J), 1, A.prob)
     A.mcmc[i, ] <- A
     A.sum <- unname(sapply(split(A, rep(1:length(J), J)), sum))
